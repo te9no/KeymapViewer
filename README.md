@@ -1,16 +1,18 @@
 # KeymapViewer
 ## 概要
-キーボード入力に応じて視覚敵に押されたキーがわかるビューワーです。  
-![](./readmeimage/KeymapViewer.gif)
+キーボード入力に応じて視覚的に押されたキーを表示するビューワーです。  
+![](./readmeimage/KeymapViewer_event.gif)  
+
 
 ## 特徴
-keypos.csvでレイアウトを設定。  
-keymap.csvでキーマップを設定。  
+* keypos.csvでレイアウトを設定。  
+* keymap.csvでキーマップを設定。  
+![](./readmeimage/KeymapViewer.gif)  
 
 ## 動作環境
 以下での動作確認済です。  
-python 3.13.3  
-ライブラリ tkinter,math,csv  
+* python 3.13.3  
+* 使用ライブラリ tkinter,math,csv  
 
 ## keypos.csv
 keyposでは各キーのサイズ(w,h),位置(x,y),回転(r)を設定します。  
