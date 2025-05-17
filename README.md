@@ -6,7 +6,7 @@
 ## 特徴
 * keypos.csvでレイアウトを設定。  
 * keymap.csvでキーマップを設定。  
-![](./readmeimage/KeymapViewer.gif)  
+![](./readmeimage/KeymapViewer.webp)  
 
 ## 動作環境
 以下での動作確認済です。  
@@ -19,5 +19,5 @@ keyposでは各キーのサイズ(w,h),位置(x,y),回転(r)を設定します�
 
 ## ログ
 コマンドプロンプト上にログも表示されます。  
-![](./readmeimage/KeymapViewerLog.gif)
+![](./readmeimage/KeymapViewerLog.webp)
 
