@@ -159,15 +159,13 @@ def main():
 
     st.title("Keyboard Visualizer")
 
-    # キーボードイベント処理コンポーネント
+    # キーボードイベント処理コンポーネント（1回だけ初期化）
     try:
         keyboard_component = init_keyboard_component()
-        pressed = keyboard_component()
-        if pressed is not None:
-            st.session_state.pressed_keys = set(pressed)
     except Exception as e:
         st.error(f"Failed to initialize keyboard component: {str(e)}")
         st.session_state.pressed_keys = set()
+        keyboard_component = None
 
     # サイドバーにスケール選択を配置
     with st.sidebar:
@@ -216,18 +214,20 @@ def main():
                 st.error("No key positions found")
 
     with col1:
-        # キーボードイベントコンポーネントの初期化
-        keyboard_component = init_keyboard_component()
-        
         # キーボードイベントの取得
-        pressed_keys = keyboard_component()
-        if pressed_keys is not None:
-            st.session_state.pressed_keys = set(pressed_keys)
+        if keyboard_component is not None:
+            try:
+                pressed_keys = keyboard_component()
+                print(pressed_keys)
+                if pressed_keys is not None:
+                    st.session_state.pressed_keys = set(pressed_keys)
+            except Exception as e:
+                st.error(f"keyboard_component error: {e}")
         
         # キーボードの表示
         img = draw_keyboard()
         if img:
-            st.image(img, use_column_width=True)
+            st.image(img, use_container_width=True)
         else:
             st.info("Please enter key positions and keymap data, then click 'Update Layout'")
 

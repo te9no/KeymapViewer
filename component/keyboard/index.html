@@ -14,6 +14,7 @@
             cursor: pointer;
         }
     </style>
+    <script src="https://unpkg.com/@streamlit/component-lib@1.4.0/dist/streamlit-component-lib.js"></script>
 </head>
 <body>
     <div id="keyboard-area" tabindex="0">Click here to capture keyboard events</div>
@@ -22,12 +23,14 @@
         const pressedKeys = new Set();
 
         function sendToStreamlit() {
+            console.log("sendToStreamlit:", Array.from(pressedKeys));
             window.Streamlit.setComponentValue(Array.from(pressedKeys));
         }
 
         area.addEventListener('keydown', (event) => {
             event.preventDefault();
             const key = event.key.toUpperCase();
+            console.log("keydown:", key);
             pressedKeys.add(key);
             sendToStreamlit();
             area.textContent = `Active keys: ${Array.from(pressedKeys).join(', ')}`;
@@ -36,6 +39,7 @@
         area.addEventListener('keyup', (event) => {
             event.preventDefault();
             const key = event.key.toUpperCase();
+            console.log("keyup:", key);
             pressedKeys.delete(key);
             sendToStreamlit();
             area.textContent = pressedKeys.size ? 
@@ -44,13 +48,16 @@
         });
 
         area.addEventListener('focus', () => {
+            console.log("focus");
             area.textContent = 'Ready to capture keyboard events';
         });
 
         area.addEventListener('blur', () => {
+            console.log("blur");
             area.textContent = 'Click here to capture keyboard events';
         });
 
+        console.log("Component loaded");
         window.Streamlit.setComponentReady();
     </script>
 </body>
