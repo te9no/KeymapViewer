@@ -1,8 +1,7 @@
 # KeymapViewer
 ## 概要
 キーボード入力に応じて視覚的に押されたキーを表示するビューワーです。  
-![](./readmeimage/KeymapViewer_event.gif)  
-
+![](./readmeimage/KeymapViewer_event.webp)  
 
 ## 特徴
 * keypos.csvでレイアウトを設定。  
