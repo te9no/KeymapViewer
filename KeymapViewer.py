@@ -3,7 +3,7 @@ import json
 import re
 from PIL import Image, ImageDraw, ImageFont
 import io
-from keyboard_component import init_keyboard_component
+from streamlit_javascript import st_javascript
 
 def init_state():
     """Initialize session state variables"""
@@ -159,13 +159,21 @@ def main():
 
     st.title("Keyboard Visualizer")
 
-    # キーボードイベント処理コンポーネント（1回だけ初期化）
-    try:
-        keyboard_component = init_keyboard_component()
-    except Exception as e:
-        st.error(f"Failed to initialize keyboard component: {str(e)}")
-        st.session_state.pressed_keys = set()
-        keyboard_component = None
+    # JavaScriptで押下中のキーを取得
+    js_code = """
+    window.pressedKeys = window.pressedKeys || new Set();
+    document.onkeydown = function(e) {
+        window.pressedKeys.add(e.key.toUpperCase());
+        console.log(window.pressedKeys);
+    };
+    document.onkeyup = function(e) {
+        window.pressedKeys.delete(e.key.toUpperCase());
+    };
+    Array.from(window.pressedKeys);
+    """
+    pressed_keys = st_javascript(js_code, key="js-keys")
+    if isinstance(pressed_keys, list):
+        st.session_state.pressed_keys = set(pressed_keys)
 
     # サイドバーにスケール選択を配置
     with st.sidebar:
@@ -214,16 +222,6 @@ def main():
                 st.error("No key positions found")
 
     with col1:
-        # キーボードイベントの取得
-        if keyboard_component is not None:
-            try:
-                pressed_keys = keyboard_component()
-                print(pressed_keys)
-                if pressed_keys is not None:
-                    st.session_state.pressed_keys = set(pressed_keys)
-            except Exception as e:
-                st.error(f"keyboard_component error: {e}")
-        
         # キーボードの表示
         img = draw_keyboard()
         if img:
