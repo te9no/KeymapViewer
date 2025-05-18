@@ -265,7 +265,9 @@ function redraw() {
   const keymap = parseKeymapMacro(keymapText);
   const scaleText = document.getElementById('scale-select').value.replace('%', '');
   const scaleFactor = parseFloat(scaleText) / 100.0;
-  const ctx = canvas.getContext('2d');
+  // canvasはここで必ず取得
+  const canvasElem = document.getElementById('key-canvas');
+  const ctx = canvasElem.getContext('2d');
   drawKeys(ctx, keyPositions, keymap, scaleFactor);
 }
 
