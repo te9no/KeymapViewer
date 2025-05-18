@@ -171,6 +171,18 @@ document.getElementById('update-btn').onclick = function() {
 const canvas = document.getElementById('key-canvas');
 canvas.tabIndex = 0; // フォーカス可能に
 canvas.addEventListener('keydown', function(e) {
+  // フォーカス移動やスクロールを防止
+  if (
+    e.key === 'Tab' ||
+    e.key.startsWith('Arrow') ||
+    e.key === ' ' ||
+    e.key === 'PageUp' ||
+    e.key === 'PageDown' ||
+    e.key === 'Home' ||
+    e.key === 'End'
+  ) {
+    e.preventDefault();
+  }
   const key = mapKeyEventToLabel(e);
   console.log("keydown event:", e, "mapped key:", key);
   if (!key) return;
@@ -179,6 +191,18 @@ canvas.addEventListener('keydown', function(e) {
   updateLog(`Key Pressed: ${key}`);
 });
 canvas.addEventListener('keyup', function(e) {
+  // フォーカス移動やスクロールを防止
+  if (
+    e.key === 'Tab' ||
+    e.key.startsWith('Arrow') ||
+    e.key === ' ' ||
+    e.key === 'PageUp' ||
+    e.key === 'PageDown' ||
+    e.key === 'Home' ||
+    e.key === 'End'
+  ) {
+    e.preventDefault();
+  }
   const key = mapKeyEventToLabel(e);
   console.log("keyup event:", e, "mapped key:", key);
   if (!key) return;
