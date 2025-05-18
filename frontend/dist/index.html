@@ -7,12 +7,17 @@
   <script>
     window.addEventListener("DOMContentLoaded", function() {
       const params = window.parent.streamlitComponentData?.args || {};
+      // 画面にも値を表示
+      document.getElementById("output").textContent =
+        "input_value: " + (params.input_value || "");
+      // Python側へ値を返す
       window.Streamlit.setComponentValue(params.input_value || "");
     });
   </script>
 </head>
 <body>
   <div>Frontend Component Loaded</div>
+  <div id="output"></div>
 </body>
 </html>
 

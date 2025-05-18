@@ -6,6 +6,9 @@
     "start": "parcel src/index.html",
     "build": "parcel build src/index.html"
   },
+  "dependencies": {
+    "@keminglabs/normalize-strings": "^1.0.0"
+  },
   "devDependencies": {
     "parcel": "^2.0.0",
     "react": "^18.0.0",
