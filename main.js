@@ -30,7 +30,9 @@ function parseJsonLayout(jsonText) {
         y: (key.y || 0) * 100,
         w: (key.w || 1) * 100,
         h: (key.h || 1) * 100,
-        r: key.r || 0
+        r: key.r || 0,
+        rx: (key.rx || 0) * 100,  // 回転の中心X
+        ry: (key.ry || 0) * 100   // 回転の中心Y
       }));
     }
     return [];
@@ -38,6 +40,37 @@ function parseJsonLayout(jsonText) {
     updateLog('JSON Parse Error: ' + e.message);
     return [];
   }
+}
+
+// ZMK形式のキー位置をパース
+function parseZmkLayout(text) {
+  const keys = [];
+  const pattern = /&key_physical_attrs\s+(\d+)\s+(\d+)\s+(-?\d+)\s+(-?\d+)\s+(-?\d+)\s+(-?\d+)\s+(-?\d+)/g;
+  
+  for (const match of text.matchAll(pattern)) {
+    const [_, w, h, x, y, rot, rx, ry] = match.map(Number);
+    keys.push({
+      x: x,
+      y: y,
+      w: w,
+      h: h,
+      r: rot,
+      rx: rx,
+      ry: ry
+    });
+  }
+  return keys;
+}
+
+// キーの回転を計算
+function rotatePoint(x, y, rx, ry, angle) {
+  const rad = (angle * Math.PI) / 180;
+  const dx = x - rx;
+  const dy = y - ry;
+  return {
+    x: rx + (dx * Math.cos(rad) - dy * Math.sin(rad)),
+    y: ry + (dx * Math.sin(rad) + dy * Math.cos(rad))
+  };
 }
 
 // キーマップパース（簡易版）
@@ -124,8 +157,18 @@ function drawKeys(ctx, keyPositions, keymap, scaleFactor) {
   const offsetY = (canvasHeight - keyHeight) / 2 - minY * autoScale;
 
   keyPositions.forEach((key, i) => {
-    const x = key.x * autoScale + offsetX;
-    const y = key.y * autoScale + offsetY;
+    let x = key.x;
+    let y = key.y;
+    
+    // 回転がある場合は座標を補正
+    if (key.r !== 0) {
+      const rotated = rotatePoint(x, y, key.rx, key.ry, key.r);
+      x = rotated.x;
+      y = rotated.y;
+    }
+    
+    x = x * autoScale + offsetX;
+    y = y * autoScale + offsetY;
     const w = key.w * autoScale;
     const h = key.h * autoScale;
     const r = key.r;
