@@ -182,7 +182,14 @@ function updateLayerSelector(layers) {
 // キー描画
 function drawKeys(ctx, keyPositions, keymap, scaleFactor) {
   console.log("drawKeys called", { keyPositions, keymap, scaleFactor });
-  ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+  // 背景色をテーマに応じて設定
+  if (document.body.classList.contains('myakumyaku')) {
+    ctx.fillStyle = '#0066cc';  // ミャクミャク様テーマの時は青背景
+    ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+  } else {
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+  }
+  
   keyRects = [];
   if (!keyPositions.length || !keymap.length) {
     console.log("drawKeys: keyPositions or keymap is empty");
