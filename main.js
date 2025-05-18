@@ -15,7 +15,7 @@ function normalizeKeyLabel(label) {
     LBRACKET: '[', RBRACKET: ']', SEMI: ';', SQT: '\'',
     BSLH: '\\', YEN: '\\', COMMA: ',', DOT: '.',
     FSLH: '/', LBKT : '{', RBKT: '}', ALPHANUMERIC: 'CAPS', COLON : ':',
-    DELETE : 'DEL', PGUP: 'PGUP', PAGEDOWN: 'PGDOWN',PRINTSCREEN : 'PSCRN',
+    DELETE : 'DEL', PAGEUP: 'PG_UP', PAGEDOWN: 'PG_DN',PRINTSCREEN : 'PSCRN',
   };
   return keyMapping[label] || label;
 }
