@@ -296,8 +296,9 @@ function updateLog(msg) {
 document.getElementById('update-btn').onclick = function() {
   console.log("update-btn clicked");
   keyStates = {};
-  resizeCanvas();
   updateLog('Layout updated successfully');
+  // 直接redrawを呼び出し
+  redraw(true);
 };
 
 // キャンバスサイズをウインドウいっぱいに調整
@@ -315,6 +316,7 @@ function resizeCanvas() {
   
   // サイズが変わった時だけ更新
   if (currentWidth !== newWidth || currentHeight !== newHeight) {
+    console.log(`Canvas size changed: ${currentWidth}x${currentHeight} -> ${newWidth}x${newHeight}`);
     canvasElem.width = newWidth;
     canvasElem.height = newHeight;
     redraw(true);
@@ -412,12 +414,15 @@ canvas.focus();
 
 // 再描画関数を修正
 function redraw(forceUpdate = false) {
-  // サイズ変更による再描画でない場合はスキップ
-  if (!forceUpdate && document.getElementById('key-canvas').width === 0) {
+  const canvasElem = document.getElementById('key-canvas');
+  
+  // キャンバスが準備できていない場合は終了
+  if (!canvasElem || !canvasElem.getContext) {
+    console.log("Canvas not ready");
     return;
   }
 
-  console.log("redraw called");
+  console.log("redraw called", { width: canvasElem.width, height: canvasElem.height });
   const jsonText = document.getElementById('json-text').value;
   const keymapText = document.getElementById('keymap-text').value;
   const keyPositions = parseJsonLayout(jsonText);
@@ -430,7 +435,6 @@ function redraw(forceUpdate = false) {
   const selectedLayer = layers[currentLayer];
   const keymap = selectedLayer ? selectedLayer.keys : [];
   
-  const canvasElem = document.getElementById('key-canvas');
   const ctx = canvasElem.getContext('2d');
   drawKeys(ctx, keyPositions, keymap, 1.0);
 }
