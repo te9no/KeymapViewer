@@ -169,25 +169,23 @@ function updateLog(msg) {
 // イベントバインド
 document.getElementById('update-btn').onclick = function() {
   console.log("update-btn clicked");
-  const jsonText = document.getElementById('json-text').value;
-  const keymapText = document.getElementById('keymap-text').value;
-  const keyPositions = parseJsonLayout(jsonText);
-  const keymap = parseKeymapMacro(keymapText);
-  const scaleText = document.getElementById('scale-select').value.replace('%', '');
-  const scaleFactor = parseFloat(scaleText) / 100.0;
-  const canvas = document.getElementById('key-canvas');
-  const ctx = canvas.getContext('2d');
-  // キー状態リセット
   keyStates = {};
-  drawKeys(ctx, keyPositions, keymap, scaleFactor);
+  resizeCanvas();
   updateLog('Layout updated successfully');
 };
 
-// スケールリストボックスの変更イベント
-document.getElementById('scale-select').addEventListener('change', function() {
-  console.log("scale-select changed:", this.value);
+// キャンバスサイズをウインドウいっぱいに調整
+function resizeCanvas() {
+  const canvasElem = document.getElementById('key-canvas');
+  const frame = document.getElementById('canvas-frame');
+  // キャンバスの幅・高さを親要素に合わせる
+  canvasElem.width = frame.clientWidth;
+  canvasElem.height = frame.clientHeight - document.getElementById('log-label').offsetHeight;
   redraw();
-});
+}
+
+// ウインドウリサイズ時にキャンバスを調整
+window.addEventListener('resize', resizeCanvas);
 
 // テーマ切り替え
 const themeSelect = document.getElementById('theme-select');
@@ -195,15 +193,19 @@ function setTheme(theme) {
   document.body.classList.remove('light', 'dark', 'blue', 'green', 'console');
   document.body.classList.add(theme);
   console.log("Theme changed:", theme);
-  redraw();
+  resizeCanvas();
 }
 if (themeSelect) {
   themeSelect.addEventListener('change', function() {
     setTheme(this.value);
+    resizeCanvas();
   });
   // 初期テーマ
   setTheme(themeSelect.value);
 }
+
+// 初回ロード時にキャンバスサイズ調整
+window.addEventListener('DOMContentLoaded', resizeCanvas);
 
 // --- キー押下/離上イベントでハイライト ---
 const canvas = document.getElementById('key-canvas');
@@ -263,12 +265,10 @@ function redraw() {
   const keymapText = document.getElementById('keymap-text').value;
   const keyPositions = parseJsonLayout(jsonText);
   const keymap = parseKeymapMacro(keymapText);
-  const scaleText = document.getElementById('scale-select').value.replace('%', '');
-  const scaleFactor = parseFloat(scaleText) / 100.0;
-  // canvasはここで必ず取得
   const canvasElem = document.getElementById('key-canvas');
   const ctx = canvasElem.getContext('2d');
-  drawKeys(ctx, keyPositions, keymap, scaleFactor);
+  // スケールファクターは常に1.0（drawKeys内で自動スケーリング）
+  drawKeys(ctx, keyPositions, keymap, 1.0);
 }
 
 // キーイベント→ラベル変換
