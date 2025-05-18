@@ -304,10 +304,21 @@ document.getElementById('update-btn').onclick = function() {
 function resizeCanvas() {
   const canvasElem = document.getElementById('key-canvas');
   const frame = document.getElementById('canvas-frame');
-  // キャンバスの幅・高さを親要素に合わせる
-  canvasElem.width = frame.clientWidth;
-  canvasElem.height = frame.clientHeight - document.getElementById('log-label').offsetHeight;
-  redraw();
+  
+  // 現在のサイズを取得
+  const currentWidth = canvasElem.width;
+  const currentHeight = canvasElem.height;
+  
+  // 新しいサイズを計算
+  const newWidth = frame.clientWidth;
+  const newHeight = frame.clientHeight - document.getElementById('log-label').offsetHeight;
+  
+  // サイズが変わった時だけ更新
+  if (currentWidth !== newWidth || currentHeight !== newHeight) {
+    canvasElem.width = newWidth;
+    canvasElem.height = newHeight;
+    redraw(true);
+  }
 }
 
 // ウインドウリサイズ時にキャンバスを調整
@@ -401,6 +412,11 @@ canvas.focus();
 
 // 再描画関数を修正
 function redraw(forceUpdate = false) {
+  // サイズ変更による再描画でない場合はスキップ
+  if (!forceUpdate && document.getElementById('key-canvas').width === 0) {
+    return;
+  }
+
   console.log("redraw called");
   const jsonText = document.getElementById('json-text').value;
   const keymapText = document.getElementById('keymap-text').value;
