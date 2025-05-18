@@ -5,3 +5,29 @@ body { font-family: sans-serif; margin: 0; }
 #log-label { font-size: 1.5em; margin: 10px; }
 #key-canvas { border: 1px solid #ccc; background: #fff; }
 
+/* ダークテーマ */
+body.dark {
+  background: #181a1b;
+  color: #eee;
+}
+body.dark #input-frame {
+  background: #23272e;
+}
+body.dark #canvas-frame {
+  background: #181a1b;
+}
+body.dark #log-label {
+  color: #fff;
+}
+body.dark #key-canvas {
+  background: #23272e;
+  border-color: #444;
+}
+body.dark textarea,
+body.dark select,
+body.dark button {
+  background: #23272e;
+  color: #eee;
+  border: 1px solid #444;
+}
+

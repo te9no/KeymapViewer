@@ -167,6 +167,13 @@ document.getElementById('update-btn').onclick = function() {
   updateLog('Layout updated successfully');
 };
 
+// テーマ切り替え
+document.getElementById('theme-toggle-btn').onclick = function() {
+  document.body.classList.toggle('dark');
+  console.log("Theme toggled. dark mode:", document.body.classList.contains('dark'));
+  redraw();
+};
+
 // --- キー押下/離上イベントでハイライト ---
 const canvas = document.getElementById('key-canvas');
 canvas.tabIndex = 0; // フォーカス可能に
