@@ -13,8 +13,8 @@ function normalizeKeyLabel(label) {
     ESC: 'ESC', BKSP: 'BACKSPACE', BSPC: 'BACKSPACE', INT3: 'INT3',
     TAB: 'TAB', TRANS: '---', MINUS : '-', EQUAL: '=',
     LBRACKET: '[', RBRACKET: ']', SEMI: ';', SQT: '\'',
-    BACKSLASH: '\\', YEN: '\\', COMMA: ',', DOT: '.',
-    SLASH: '/'
+    BSLH: '\\', YEN: '\\', COMMA: ',', DOT: '.',
+    FSLH: '/', LBKT : '{', RBKT: '}', ALPHANUMERIC: 'CAPS',
   };
   return keyMapping[label] || label;
 }
