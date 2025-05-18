@@ -1,8 +1,0 @@
-{
-  "name": "keymap-viewer",
-  "version": "1.0.0",
-  "description": "Static keymap visualizer for Netlify",
-  "scripts": {
-    "build": "echo 'No build step required for static site.'"
-  }
-}

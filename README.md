@@ -1,23 +1,56 @@
 # KeymapViewer
+
 ## 概要
-キーボード入力に応じて視覚的に押されたキーを表示するビューワーです。  
-![](./readmeimage/KeymapViewer_event.webp)  
+キーボード入力に応じて視覚的に押されたキーをWebブラウザ上で表示するビューワーです。  
 
 ## 特徴
-* keypos.csvでレイアウトを設定。  
-* keymap.csvでキーマップを設定。  
-![](./readmeimage/KeymapViewer.webp)  
+* QMK互換JSONでレイアウトを設定
+* ZMK風マクロ記法でキーマップを設定
+* テーマ切り替え（ライト/ダーク/ブルー/グリーン/コンソール風）
+* キャンバスはウインドウサイズに自動フィット
+* キー押下時にリアルタイムでハイライト表示
+* ログ表示機能
 
 ## 動作環境
-以下での動作確認済です。  
-* python 3.13.3  
-* 使用ライブラリ tkinter,math,csv  
+- Webブラウザ（Chrome, Edge, Firefox, Safari等）
+- サーバ不要、Netlify等の静的ホスティングで動作
 
-## keypos.csv
-keyposでは各キーのサイズ(w,h),位置(x,y),回転(r)を設定します。  
-実行画面の左上が位置(0,0)です。  
+## 使い方
+1. `Layout JSON` にQMK互換のレイアウトJSONを貼り付け
+2. `Keymap Macro` にZMK風のキーマップマクロを貼り付け
+3. `Update Layout` ボタンで反映
+4. キーボードを押すと該当キーがハイライトされます
+5. テーマは右上のセレクトボックスで切り替え可能
+
+## レイアウトJSON例
+```json
+{
+  "layouts": {
+    "layout_US": {
+      "layout": [
+        { "x": 0.0, "y": 0.0 },
+        { "x": 1.0, "y": 0.0 }
+        // ...省略...
+      ]
+    }
+  }
+}
+```
+
+## キーマップマクロ例
+```
+keymap {
+  compatible = "zmk,keymap";
+  default_layer {
+    bindings = <
+      &kp Q &kp W &kp E &kp R &kp T
+      // ...省略...
+    >;
+  };
+};
+```
 
 ## ログ
-コマンドプロンプト上にログも表示されます。  
+画面上部に直近のキーイベントが表示されます。  
 ![](./readmeimage/KeymapViewerLog.webp)
 
