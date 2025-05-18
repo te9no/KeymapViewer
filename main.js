@@ -15,7 +15,7 @@ function normalizeKeyLabel(label) {
     LBRACKET: '[', RBRACKET: ']', SEMI: ';', SQT: '\'',
     BSLH: '\\', YEN: '\\', COMMA: ',', DOT: '.',
     FSLH: '/', LBKT : '{', RBKT: '}', ALPHANUMERIC: 'CAPS', COLON : ':',
-    DELETE : 'DEL', PAGEUP: 'PGUP', PAGEDN: 'PGDOWN',PRINTSCREEN : 'PSCRN',
+    DELETE : 'DEL', PGUP: 'PGUP', PAGEDOWN: 'PGDOWN',PRINTSCREEN : 'PSCRN',
   };
   return keyMapping[label] || label;
 }
@@ -185,14 +185,18 @@ function drawKeys(ctx, keyPositions, keymap, scaleFactor) {
   else if (document.body.classList.contains('myakumyaku')) theme = 'myakumyaku';
 
   const themeColors = {
-    light:   { normal: '#f3f4f6', special: '#e5e7eb', pressed: '#fef3c7', stroke: '#9ca3af' },
-    dark:    { normal: '#374151', special: '#1f2937', pressed: '#92400e', stroke: '#6b7280' },
-    blue:    { normal: '#dbeafe', special: '#bfdbfe', pressed: '#ffb347', stroke: '#60a5fa' },
-    green:   { normal: '#d1fae5', special: '#a7f3d0', pressed: '#ffe066', stroke: '#34d399' },
-    console: { normal: '#003300', special: '#001a00', pressed: '#00ff00', stroke: '#00ff00' },
-    myakumyaku: { normal: '#ff0000', special: '#0066cc', pressed: '#ff69b4', stroke: '#ffffff' }
+    light:   { normal: '#f3f4f6', special: '#e5e7eb', pressed: '#fef3c7', stroke: '#9ca3af', bg: '#ffffff', text: '#1f2937' },
+    dark:    { normal: '#374151', special: '#1f2937', pressed: '#92400e', stroke: '#6b7280', bg: '#111827', text: '#ffffff' },
+    blue:    { normal: '#dbeafe', special: '#bfdbfe', pressed: '#ffb347', stroke: '#60a5fa', bg: '#eff6ff', text: '#1e40af' },
+    green:   { normal: '#d1fae5', special: '#a7f3d0', pressed: '#ffe066', stroke: '#34d399', bg: '#ecfdf5', text: '#065f46' },
+    console: { normal: '#003300', special: '#001a00', pressed: '#00ff00', stroke: '#00ff00', bg: '#000000', text: '#00ff00' },
+    myakumyaku: { normal: '#ff0000', special: '#0066cc', pressed: '#ff69b4', stroke: '#ffffff', bg: '#0066cc', text: '#ffffff' }
   };
   const colors = themeColors[theme];
+
+  // 背景色をテーマに応じて設定
+  ctx.fillStyle = colors.bg;
+  ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
   const minX = Math.min(...keyPositions.map(k => k.x));
   const minY = Math.min(...keyPositions.map(k => k.y));
@@ -267,9 +271,7 @@ function drawKeys(ctx, keyPositions, keymap, scaleFactor) {
 
     // テキストを描画
     ctx.shadowColor = 'transparent'; // テキストには影を付けない
-    ctx.fillStyle = (theme === 'console') ? '#00ff00' : 
-                   (theme === 'myakumyaku') ? (label === '---' ? 'white' : '#ffffff') : 
-                   theme === 'dark' ? '#ffffff' : '#1f2937';
+    ctx.fillStyle = colors.text;
     ctx.font = `${Math.max(8, 12 * scaleFactor)}px Inter, sans-serif`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
