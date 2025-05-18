@@ -53,3 +53,9 @@ keymap {
 ## ログ
 画面上部に直近のキーイベントが表示されます。  
 ![](./readmeimage/KeymapViewerLog.webp)
+
+## 謝辞
+このプロジェクトは[ataruno](https://github.com/ataruno)さんの[KeymapViewer](https://github.com/ataruno/KeymapViewer)をベースに、Web対応に改変したものです。
+オリジナルのアイデアと実装を提供してくださったatarunoさんに深く感謝いたします。
+
+原作: [KeymapViewer](https://github.com/ataruno/KeymapViewer) by [@ataruno](https://github.com/ataruno)
