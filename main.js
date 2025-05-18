@@ -406,8 +406,6 @@ canvas.addEventListener('keyup', function(e) {
     e.key === 'F10' || // F10キーを追加
     e.key === 'F11' || // F11キーを追加
     e.key === 'F12' 
-    
-
   ) {
     e.preventDefault();
   }
@@ -422,63 +420,62 @@ canvas.addEventListener('blur', function() {
   console.log("canvas blur: reset all key states");
   // フォーカス外れたら全キーリセット
   Object.keys(keyStates).forEach(k => keyStates[k] = false);
+  redraw();
+});
+canvas.focus();
+
+// 再描画関数を修正
+function redraw(forceUpdate = false) {
+  const canvasElem = document.getElementById('key-canvas');
+  
+  // キャンバスが準備できていない場合は終了
+  if (!canvasElem || !canvasElem.getContext) {
+    console.log("Canvas not ready");
+    return;
   }
 
   console.log("redraw called", { width: canvasElem.width, height: canvasElem.height });
   const jsonText = document.getElementById('json-text').value;
-  const keymapText = document.getElementById('keymap-text').value; 再描画関数を修正
-  const keyPositions = parseJsonLayout(jsonText);e = false) {
-  const canvasElem = document.getElementById('key-canvas');
+  const keymapText = document.getElementById('keymap-text').value;
+  const keyPositions = parseJsonLayout(jsonText);
   const layers = parseKeymapMacro(keymapText);
-  // キャンバスが準備できていない場合は終了
-  // レイヤー選択UIの更新（現在の選択を保持）vasElem.getContext) {
+  
+  // レイヤー選択UIの更新（現在の選択を保持）
   const currentLayer = updateLayerSelector(layers);
   
-  // 選択されているレイヤーのキーマップを取得const jsonText = document.getElementById('json-text').value;
-  const selectedLayer = layers[currentLayer];Id('keymap-text').value;
-  const keymap = selectedLayer ? selectedLayer.keys : [];Text);
-   const layers = parseKeymapMacro(keymapText);
-  const ctx = canvasElem.getContext('2d');  
-  drawKeys(ctx, keyPositions, keymap, 1.0);新（現在の選択を保持）
-}erSelector(layers);
+  // 選択されているレイヤーのキーマップを取得
+  const selectedLayer = layers[currentLayer];
+  const keymap = selectedLayer ? selectedLayer.keys : [];
+  
+  const ctx = canvasElem.getContext('2d');
+  drawKeys(ctx, keyPositions, keymap, 1.0);
+}
 
-// キーイベント→ラベル変換イヤーのキーマップを取得
-function mapKeyEventToLabel(e) {rrentLayer];
-  let key = e.key.toUpperCase();ectedLayer.keys : [];
+// キーイベント→ラベル変換
+function mapKeyEventToLabel(e) {
+  let key = e.key.toUpperCase();
   // 一部特殊キー対応
-  if (key === ' ') key = 'SPACE';d');
-  if (key === 'ESCAPE') key = 'ESC';map, 1.0);
+  if (key === ' ') key = 'SPACE';
+  if (key === 'ESCAPE') key = 'ESC';
   if (key === 'SHIFT') key = 'SHIFT';
   if (key === 'CONTROL') key = 'CTRL';
   if (key === 'ALT') key = 'ALT';
   if (key === 'META' || key === 'OS') key = 'WIN';
   if (key === 'ENTER') key = 'ENTER';
-  if (key === 'TAB') key = 'TAB';対応
-  if (key === 'BACKSPACE') key = 'BACKSPACE';;
-  if (key === 'DELETE') key = 'DELETE'; 'ESC';
-  // 記号など追加'SHIFT';
-  if (key === '\\') key = 'YEN';= 'CTRL';
-  if (key === '[') key = '{';;
-  if (key === ']') key = '}';OS') key = 'WIN';
-  if (key === '@') key = '@';TER';
+  if (key === 'TAB') key = 'TAB';
+  if (key === 'BACKSPACE') key = 'BACKSPACE';
+  if (key === 'DELETE') key = 'DELETE';
+  // 記号など追加
+  if (key === '\\') key = 'YEN';
+  if (key === '[') key = '{';
+  if (key === ']') key = '}';
+  if (key === '@') key = '@';
   if (key === ';') key = 'SEMI';
-  if (key === ':') key = 'COLON';= 'BACKSPACE';
-  if (key === '\'') key = 'SQT';LETE';
-  if (key === ',') key = 'COMMA';  // 記号など追加
-  if (key === '.') key = 'DOT';  if (key === '\\') key = 'YEN';
+  if (key === ':') key = 'COLON';
+  if (key === '\'') key = 'SQT';
+  if (key === ',') key = 'COMMA';
+  if (key === '.') key = 'DOT';
   if (key === '/') key = 'SLASH';
-
-
-  if (key === 'ARROWLEFT') key = 'LEFT';
-  if (key === 'ARROWUP') key = 'UP';y === ':') key = 'COLON';
-  if (key === 'ARROWRIGHT') key = 'RIGHT';
-  if (key === 'ARROWDOWN') key = 'DOWN';
-  // 正規化ey = 'DOT';
-  const normalized = normalizeKeyLabel(key); if (key === '/') key = 'SLASH';
-
-
-
-}  return normalized;  console.log("mapKeyEventToLabel:", e.key, "->", normalized);
 
   if (key === 'ARROWLEFT') key = 'LEFT';
   if (key === 'ARROWUP') key = 'UP';
