@@ -15,6 +15,7 @@ function normalizeKeyLabel(label) {
     LBRACKET: '[', RBRACKET: ']', SEMI: ';', SQT: '\'',
     BSLH: '\\', YEN: '\\', COMMA: ',', DOT: '.',
     FSLH: '/', LBKT : '{', RBKT: '}', ALPHANUMERIC: 'CAPS', COLON : ':',
+    DELETE : 'DEL', PGUP: 'PGUP', PGDN: 'PGDN',PRINTSCREEN : 'PSCRN',
   };
   return keyMapping[label] || label;
 }
@@ -194,13 +195,15 @@ function drawKeys(ctx, keyPositions, keymap, scaleFactor) {
   else if (document.body.classList.contains('blue')) theme = 'blue';
   else if (document.body.classList.contains('green')) theme = 'green';
   else if (document.body.classList.contains('console')) theme = 'console';
+  else if (document.body.classList.contains('myakumyaku')) theme = 'myakumyaku';
 
   const themeColors = {
     light:   { normal: 'lightgray', special: '#dddddd', pressed: 'orange' },
     dark:    { normal: '#444',      special: '#222',    pressed: 'orange' },
     blue:    { normal: '#b3e0ff',   special: '#eaf6fb', pressed: '#ffb347' },
     green:   { normal: '#b2f2c9',   special: '#eafbf0', pressed: '#ffe066' },
-    console: { normal: '#003300',   special: '#001a00', pressed: '#00ff00' }
+    console: { normal: '#003300',   special: '#001a00', pressed: '#00ff00' },
+    myakumyaku: { normal: '#ffd1dc', special: '#ffe4e1', pressed: '#ff69b4' }  // ミャクミャク様風テーマ
   };
   const colors = themeColors[theme];
 
@@ -305,7 +308,7 @@ window.addEventListener('resize', resizeCanvas);
 // テーマ切り替え
 const themeSelect = document.getElementById('theme-select');
 function setTheme(theme) {
-  document.body.classList.remove('light', 'dark', 'blue', 'green', 'console');
+  document.body.classList.remove('light', 'dark', 'blue', 'green', 'console', 'myakumyaku');
   document.body.classList.add(theme);
   console.log("Theme changed:", theme);
   resizeCanvas();
