@@ -20,7 +20,7 @@
   </script>
 </head>
 <body class="h-full">
-  <div class="min-h-full">
+  <div class="min-h-full flex flex-col">
     <nav class="bg-white shadow-sm dark:bg-gray-800">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="flex h-16 justify-between">
@@ -45,30 +45,32 @@
       </div>
     </nav>
 
-    <div class="mx-auto max-w-7xl py-6 sm:px-6 lg:px-8">
-      <div class="px-4 sm:px-0">
-        <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
-          <div class="overflow-hidden rounded-lg bg-white shadow dark:bg-gray-800">
-            <div class="p-4">
-              <label class="block text-sm font-medium text-gray-900 dark:text-white">Layout JSON</label>
-              <textarea id="json-text" rows="5" class="mt-2 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6 font-mono dark:bg-gray-700 dark:text-white dark:ring-gray-600"></textarea>
+    <div class="flex-1 flex flex-col">
+      <div class="mx-auto w-full max-w-7xl py-6 sm:px-6 lg:px-8">
+        <div class="px-4 sm:px-0">
+          <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+            <div class="overflow-hidden rounded-lg bg-white shadow dark:bg-gray-800">
+              <div class="p-4">
+                <label class="block text-sm font-medium text-gray-900 dark:text-white">Layout JSON</label>
+                <textarea id="json-text" rows="5" class="mt-2 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6 font-mono dark:bg-gray-700 dark:text-white dark:ring-gray-600"></textarea>
+              </div>
+            </div>
+            <div class="overflow-hidden rounded-lg bg-white shadow dark:bg-gray-800">
+              <div class="p-4">
+                <label class="block text-sm font-medium text-gray-900 dark:text-white">Keymap Macro</label>
+                <textarea id="keymap-text" rows="5" class="mt-2 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6 font-mono dark:bg-gray-700 dark:text-white dark:ring-gray-600"></textarea>
+              </div>
             </div>
           </div>
-          <div class="overflow-hidden rounded-lg bg-white shadow dark:bg-gray-800">
-            <div class="p-4">
-              <label class="block text-sm font-medium text-gray-900 dark:text-white">Keymap Macro</label>
-              <textarea id="keymap-text" rows="5" class="mt-2 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6 font-mono dark:bg-gray-700 dark:text-white dark:ring-gray-600"></textarea>
-            </div>
+          <div class="mt-4">
+            <button id="update-btn" type="button" class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Update Layout</button>
           </div>
         </div>
-        <div class="mt-4">
-          <button id="update-btn" type="button" class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Update Layout</button>
-        </div>
-      </div>
-      <div id="canvas-frame" class="mt-4">
-        <div id="log-label" class="mb-2 text-sm text-gray-600 dark:text-gray-400">KEY LOG</div>
-        <div class="overflow-hidden rounded-lg bg-white shadow dark:bg-gray-800">
-          <canvas id="key-canvas" tabindex="0" class="w-full"></canvas>
+        <div id="canvas-frame" class="mt-4 flex-1 flex flex-col min-h-0">
+          <div id="log-label" class="mb-2 text-sm text-gray-600 dark:text-gray-400">KEY LOG</div>
+          <div class="flex-1 overflow-hidden rounded-lg bg-white shadow dark:bg-gray-800">
+            <canvas id="key-canvas" tabindex="0" class="w-full h-full"></canvas>
+          </div>
         </div>
       </div>
     </div>
