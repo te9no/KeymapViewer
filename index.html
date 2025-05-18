@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>Key Visualizer (Web版)</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="main-frame">
+    <div id="input-frame">
+      <label>Layout JSON:</label>
+      <textarea id="json-text" rows="5" cols="50"></textarea>
+      <label>Keymap Macro:</label>
+      <textarea id="keymap-text" rows="5" cols="50"></textarea>
+      <button id="update-btn">Update Layout</button>
+      <label>Scale:
+        <select id="scale-select">
+          <option>25%</option>
+          <option>50%</option>
+          <option selected>80%</option>
+          <option>100%</option>
+          <option>125%</option>
+          <option>150%</option>
+        </select>
+      </label>
+    </div>
+    <div id="canvas-frame">
+      <div id="log-label">KEY LOG</div>
+      <canvas id="key-canvas" width="1200" height="600" tabindex="0"></canvas>
+    </div>
+  </div>
+  <script src="main.js"></script>
+</body>
+</html>
