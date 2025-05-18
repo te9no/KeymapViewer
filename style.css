@@ -1,0 +1,147 @@
+body { font-family: sans-serif; margin: 0; }
+#main-frame { display: flex; flex-direction: column; height: 100vh; }
+#input-frame { padding: 10px; background: #f8f8f8; }
+#canvas-frame { flex: 1; display: flex; flex-direction: column; align-items: stretch; }
+#log-label { font-size: 1.5em; margin: 10px; }
+#key-canvas { 
+  border: 1px solid #ccc; 
+  background: #fff; 
+  width: 100%; 
+  height: 100%; 
+  box-sizing: border-box; 
+  display: block; 
+  flex: 1 1 auto; 
+  min-height: 200px; 
+}
+
+/* ライトテーマ（デフォルト） */
+body.light {
+  background: #fff;
+  color: #222;
+}
+body.light #input-frame {
+  background: #f8f8f8;
+}
+body.light #canvas-frame {
+  background: #fff;
+}
+body.light #log-label {
+  color: #222;
+}
+body.light #key-canvas {
+  background: #fff;
+  border-color: #ccc;
+}
+body.light textarea,
+body.light select,
+body.light button {
+  background: #fff;
+  color: #222;
+  border: 1px solid #ccc;
+}
+
+/* ダークテーマ */
+body.dark {
+  background: #181a1b;
+  color: #eee;
+}
+body.dark #input-frame {
+  background: #23272e;
+}
+body.dark #canvas-frame {
+  background: #181a1b;
+}
+body.dark #log-label {
+  color: #fff;
+}
+body.dark #key-canvas {
+  background: #23272e;
+  border-color: #444;
+}
+body.dark textarea,
+body.dark select,
+body.dark button {
+  background: #23272e;
+  color: #eee;
+  border: 1px solid #444;
+}
+
+/* ブルーテーマ */
+body.blue {
+  background: #eaf6fb;
+  color: #155a8a;
+}
+body.blue #input-frame {
+  background: #d0e7f7;
+}
+body.blue #canvas-frame {
+  background: #eaf6fb;
+}
+body.blue #log-label {
+  color: #155a8a;
+}
+body.blue #key-canvas {
+  background: #d0e7f7;
+  border-color: #155a8a;
+}
+body.blue textarea,
+body.blue select,
+body.blue button {
+  background: #eaf6fb;
+  color: #155a8a;
+  border: 1px solid #155a8a;
+}
+
+/* グリーンテーマ */
+body.green {
+  background: #eafbf0;
+  color: #1a7f4c;
+}
+body.green #input-frame {
+  background: #d0f7e2;
+}
+body.green #canvas-frame {
+  background: #eafbf0;
+}
+body.green #log-label {
+  color: #1a7f4c;
+}
+body.green #key-canvas {
+  background: #d0f7e2;
+  border-color: #1a7f4c;
+}
+body.green textarea,
+body.green select,
+body.green button {
+  background: #eafbf0;
+  color: #1a7f4c;
+  border: 1px solid #1a7f4c;
+}
+
+/* コンソール風テーマ */
+body.console {
+  background: #000;
+  color: #00ff00;
+}
+body.console #input-frame {
+  background: #111;
+}
+body.console #canvas-frame {
+  background: #000;
+}
+body.console #log-label {
+  color: #00ff00;
+  text-shadow: 0 0 2px #00ff00;
+}
+body.console #key-canvas {
+  background: #111;
+  border-color: #00ff00;
+}
+body.console textarea,
+body.console select,
+body.console button {
+  background: #000;
+  color: #00ff00;
+  border: 1px solid #00ff00;
+}
+
