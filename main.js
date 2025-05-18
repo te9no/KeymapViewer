@@ -11,7 +11,10 @@ function normalizeKeyLabel(label) {
     RSHFT: 'SHIFT', RSHIFT: 'SHIFT', LCTRL: 'CTRL', RCTRL: 'CTRL',
     LGUI: 'WIN', RGUI: 'WIN', SPACE: 'SPACE', ENTER: 'ENTER',
     ESC: 'ESC', BKSP: 'BACKSPACE', BSPC: 'BACKSPACE', INT3: 'INT3',
-    TAB: 'TAB', TRANS: '---'
+    TAB: 'TAB', TRANS: '---', MINUS : '-', EQUAL: '=',
+    LBRACKET: '[', RBRACKET: ']', SEMI: ';', SQT: '\'',
+    BACKSLASH: '\\', YEN: '\\', COMMA: ',', DOT: '.',
+    SLASH: '/'
   };
   return keyMapping[label] || label;
 }
