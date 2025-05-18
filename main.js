@@ -14,7 +14,7 @@ function normalizeKeyLabel(label) {
     TAB: 'TAB', TRANS: '---', MINUS : '-', EQUAL: '=',
     LBRACKET: '[', RBRACKET: ']', SEMI: ';', SQT: '\'',
     BSLH: '\\', YEN: '\\', COMMA: ',', DOT: '.',
-    FSLH: '/', LBKT : '{', RBKT: '}', ALPHANUMERIC: 'CAPS',
+    FSLH: '/', LBKT : '{', RBKT: '}', ALPHANUMERIC: 'CAPS', COLON : ':',
   };
   return keyMapping[label] || label;
 }
@@ -73,10 +73,12 @@ function rotatePoint(x, y, rx, ry, angle) {
   };
 }
 
-// キーマップパース（簡易版）
+// キーマップパース（複数レイヤー対応版）
 function parseKeymapMacro(keymapText) {
-  const keymap = [];
+  const layers = {};
+  let currentLayer = null;
   let inBindings = false;
+  
   const patterns = [
     [/&kp\s+(\S+)/, x => x],
     [/&lt\s+\d+\s+(\S+)/, x => x],
@@ -85,11 +87,34 @@ function parseKeymapMacro(keymapText) {
     [/&mF(\d+)/, x => `F${x}`],
     [/&trans/, _ => 'TRANS']
   ];
+
   keymapText.split('\n').forEach(line => {
     line = line.trim();
+    
+    // レイヤー開始行の検出
+    const layerMatch = line.match(/(\w+)_layer\s*{/);
+    if (layerMatch) {
+      currentLayer = layerMatch[1];
+      layers[currentLayer] = {
+        name: currentLayer,
+        label: '',
+        keys: []
+      };
+      return;
+    }
+
+    // レイヤーラベルの検出
+    const labelMatch = line.match(/label\s*=\s*"([^"]+)"/);
+    if (labelMatch && currentLayer) {
+      layers[currentLayer].label = labelMatch[1];
+      return;
+    }
+
     if (line.includes('bindings = <')) { inBindings = true; return; }
     if (line.includes('>;')) { inBindings = false; return; }
-    if (!inBindings || !line || line.startsWith('//')) return;
+    
+    if (!inBindings || !line || line.startsWith('//') || !currentLayer) return;
+
     line.split('&').forEach(code => {
       code = code.trim();
       if (!code) return;
@@ -98,15 +123,49 @@ function parseKeymapMacro(keymapText) {
       for (const [pat, fn] of patterns) {
         const m = code.match(pat);
         if (m) {
-          keymap.push(fn(m[1]));
+          layers[currentLayer].keys.push(fn(m[1]));
           found = true;
           break;
         }
       }
-      if (!found) keymap.push('?');
+      if (!found) layers[currentLayer].keys.push('?');
     });
   });
-  return keymap;
+
+  return layers;
+}
+
+// レイヤー選択UIの更新
+function updateLayerSelector(layers) {
+  const selector = document.getElementById('layer-select');
+  if (!selector) {
+    const frame = document.getElementById('canvas-frame');
+    const controlDiv = document.createElement('div');
+    controlDiv.style.marginBottom = '10px';
+    
+    const label = document.createElement('label');
+    label.textContent = 'Layer: ';
+    controlDiv.appendChild(label);
+    
+    const select = document.createElement('select');
+    select.id = 'layer-select';
+    select.onchange = function() {
+      redraw();
+    };
+    controlDiv.appendChild(select);
+    
+    frame.insertBefore(controlDiv, frame.firstChild);
+  }
+
+  const select = document.getElementById('layer-select');
+  select.innerHTML = '';
+  
+  Object.values(layers).forEach(layer => {
+    const option = document.createElement('option');
+    option.value = layer.name;
+    option.textContent = `${layer.label} (${layer.name})`;
+    select.appendChild(option);
+  });
 }
 
 // キー描画
@@ -304,16 +363,24 @@ canvas.addEventListener('blur', function() {
 });
 canvas.focus();
 
-// 再描画関数
+// 再描画関数を修正
 function redraw() {
   console.log("redraw called");
   const jsonText = document.getElementById('json-text').value;
   const keymapText = document.getElementById('keymap-text').value;
   const keyPositions = parseJsonLayout(jsonText);
-  const keymap = parseKeymapMacro(keymapText);
+  const layers = parseKeymapMacro(keymapText);
+  
+  // レイヤー選択UIの更新
+  updateLayerSelector(layers);
+  
+  // 選択されているレイヤーのキーマップを取得
+  const layerSelect = document.getElementById('layer-select');
+  const selectedLayer = layers[layerSelect.value];
+  const keymap = selectedLayer ? selectedLayer.keys : [];
+  
   const canvasElem = document.getElementById('key-canvas');
   const ctx = canvasElem.getContext('2d');
-  // スケールファクターは常に1.0（drawKeys内で自動スケーリング）
   drawKeys(ctx, keyPositions, keymap, 1.0);
 }
 
