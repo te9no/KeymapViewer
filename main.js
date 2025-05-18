@@ -84,13 +84,12 @@ function drawKeys(ctx, keyPositions, keymap, scaleFactor) {
   }
 
   // テーマごとの色設定
-  let theme = document.body.classList.contains('dark') ? 'dark'
-    : document.body.classList.contains('blue') ? 'blue'
-    : document.body.classList.contains('green') ? 'green'
-    : document.body.classList.contains('console') ? 'console'
-    : 'light';
+  let theme = 'light';
+  if (document.body.classList.contains('dark')) theme = 'dark';
+  else if (document.body.classList.contains('blue')) theme = 'blue';
+  else if (document.body.classList.contains('green')) theme = 'green';
+  else if (document.body.classList.contains('console')) theme = 'console';
 
-  // テーマごとの色
   const themeColors = {
     light:   { normal: 'lightgray', special: '#dddddd', pressed: 'orange' },
     dark:    { normal: '#444',      special: '#222',    pressed: 'orange' },
@@ -193,16 +192,18 @@ document.getElementById('scale-select').addEventListener('change', function() {
 // テーマ切り替え
 const themeSelect = document.getElementById('theme-select');
 function setTheme(theme) {
-  document.body.classList.remove('light', 'dark', 'blue', 'green');
+  document.body.classList.remove('light', 'dark', 'blue', 'green', 'console');
   document.body.classList.add(theme);
   console.log("Theme changed:", theme);
   redraw();
 }
-themeSelect.addEventListener('change', function() {
-  setTheme(this.value);
-});
-// 初期テーマ
-setTheme(themeSelect.value);
+if (themeSelect) {
+  themeSelect.addEventListener('change', function() {
+    setTheme(this.value);
+  });
+  // 初期テーマ
+  setTheme(themeSelect.value);
+}
 
 // --- キー押下/離上イベントでハイライト ---
 const canvas = document.getElementById('key-canvas');
@@ -289,7 +290,7 @@ function mapKeyEventToLabel(e) {
   if (key === '@') key = '@';
   if (key === ';') key = 'SEMI';
   if (key === ':') key = 'COLON';
-    if (key === '\'') key = 'SQT';
+  if (key === '\'') key = 'SQT';
   if (key === ',') key = 'COMMA';
   if (key === '.') key = 'DOT';
   if (key === '/') key = 'SLASH';
