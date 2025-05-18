@@ -151,7 +151,7 @@ function drawKeys(ctx, keyPositions, keymap, scaleFactor) {
     ctx.fillText(label, 0, 0);
     ctx.restore();
 
-    console.log(`drawKeys: drawing key ${label} at (${x},${y}) size (${w},${h}) r=${r} pressed=${keyStates[label]}`);
+    // console.log(`drawKeys: drawing key ${label} at (${x},${y}) size (${w},${h}) r=${r} pressed=${keyStates[label]}`);
 
     // キーの位置情報を保存（押下判定用）
     keyRects.push({ label, x, y, w, h, r });
