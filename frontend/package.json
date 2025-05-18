@@ -1,0 +1,14 @@
+{
+  "name": "keymap-viewer-frontend",
+  "version": "1.0.0",
+  "description": "Frontend for KeymapViewer custom Streamlit component",
+  "scripts": {
+    "start": "parcel src/index.html",
+    "build": "parcel build src/index.html"
+  },
+  "devDependencies": {
+    "parcel": "^2.0.0",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0"
+  }
+}

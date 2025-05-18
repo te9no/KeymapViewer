@@ -1,9 +1,11 @@
 import streamlit as st
+import streamlit.components.v1 as components
+from streamlit_js_eval import streamlit_js_eval
 import json
 import re
 from PIL import Image, ImageDraw, ImageFont
 import io
-from streamlit_javascript import st_javascript
+from frontend import frontend_component
 
 def init_state():
     """Initialize session state variables"""
@@ -156,24 +158,28 @@ def draw_keyboard():
 def main():
     st.set_page_config(page_title="Keyboard Visualizer", layout="wide")
     init_state()
-
     st.title("Keyboard Visualizer")
 
-    # JavaScriptで押下中のキーを取得
-    js_code = """
-    window.pressedKeys = window.pressedKeys || new Set();
-    document.onkeydown = function(e) {
-        window.pressedKeys.add(e.key.toUpperCase());
-        console.log(window.pressedKeys);
-    };
-    document.onkeyup = function(e) {
-        window.pressedKeys.delete(e.key.toUpperCase());
-    };
-    Array.from(window.pressedKeys);
+    # iframeでキー取得→iframe自身だけリロード
+    html_code = """
+    <script>
+    window.addEventListener('keydown', function(e) {
+        const key = e.key;
+        const url = new URL(window.location.href);
+        url.searchParams.set('key', key);
+        window.location.replace(url);
+    });
+    </script>
+    <p>Press any key!</p>
     """
-    pressed_keys = st_javascript(js_code, key="js-keys")
-    if isinstance(pressed_keys, list):
-        st.session_state.pressed_keys = set(pressed_keys)
+    iframe = components.html(html_code, height=100)
+
+    # iframeのクエリパラメータからキー取得
+    iframe_key = st.query_params.get("key", [""])[0]
+    if iframe_key:
+        st.session_state.pressed_keys = {iframe_key.upper()}
+        st.write(f"Pressed key: {iframe_key}")
+        print(f"Pressed key: {iframe_key}")
 
     # サイドバーにスケール選択を配置
     with st.sidebar:
@@ -228,6 +234,18 @@ def main():
             st.image(img, use_container_width=True)
         else:
             st.info("Please enter key positions and keymap data, then click 'Update Layout'")
+
+    # Custom component example
+    st.title("Streamlit Custom Component Example")
+
+    # Python→JSへ渡す値
+    input_value = st.text_input("PythonからJSへ渡す値", "Hello from Python")
+
+    # カスタムコンポーネント呼び出し
+    output = frontend_component(input_value=input_value, key="my_frontend")
+
+    # JS→Pythonへの返却値を表示
+    st.write("JSから返ってきた値:", output)
 
 if __name__ == "__main__":
     main()
