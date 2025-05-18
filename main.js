@@ -11,8 +11,7 @@ function normalizeKeyLabel(label) {
     RSHFT: 'SHIFT', RSHIFT: 'SHIFT', LCTRL: 'CTRL', RCTRL: 'CTRL',
     LGUI: 'WIN', RGUI: 'WIN', SPACE: 'SPACE', ENTER: 'ENTER',
     ESC: 'ESC', BKSP: 'BACKSPACE', BSPC: 'BACKSPACE', INT3: 'INT3',
-    TAB: 'TAB', F13: 'F13', F14: 'F14', F15: 'F15', F16: 'F16',
-    F17: 'F17', F18: 'F18', TRANS: '---'
+    TAB: 'TAB', TRANS: '---'
   };
   return keyMapping[label] || label;
 }
@@ -222,14 +221,23 @@ function mapKeyEventToLabel(e) {
   if (key === 'TAB') key = 'TAB';
   if (key === 'BACKSPACE') key = 'BACKSPACE';
   if (key === 'DELETE') key = 'DELETE';
-  if (key === 'F13' || key === 'F14' || key === 'F15' || key === 'F16' || key === 'F17' || key === 'F18') key = key;
   // 記号など追加
   if (key === '\\') key = 'YEN';
   if (key === '[') key = '{';
   if (key === ']') key = '}';
   if (key === '@') key = '@';
-  if (key === ';') key = ';';
-  if (key === ':') key = ':';
+  if (key === ';') key = 'SEMI';
+  if (key === ':') key = 'COLON';
+    if (key === '\'') key = 'SQT';
+  if (key === ',') key = 'COMMA';
+  if (key === '.') key = 'DOT';
+  if (key === '/') key = 'SLASH';
+
+
+  if (key === 'ARROWLEFT') key = 'LEFT';
+  if (key === 'ARROWUP') key = 'UP';
+  if (key === 'ARROWRIGHT') key = 'RIGHT';
+  if (key === 'ARROWDOWN') key = 'DOWN';
   // 正規化
   const normalized = normalizeKeyLabel(key);
   console.log("mapKeyEventToLabel:", e.key, "->", normalized);
