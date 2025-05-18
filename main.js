@@ -43,26 +43,6 @@ function parseJsonLayout(jsonText) {
   }
 }
 
-// ZMK形式のキー位置をパース
-function parseZmkLayout(text) {
-  const keys = [];
-  const pattern = /&key_physical_attrs\s+(\d+)\s+(\d+)\s+(-?\d+)\s+(-?\d+)\s+(-?\d+)\s+(-?\d+)\s+(-?\d+)/g;
-  
-  for (const match of text.matchAll(pattern)) {
-    const [_, w, h, x, y, rot, rx, ry] = match.map(Number);
-    keys.push({
-      x: x,
-      y: y,
-      w: w,
-      h: h,
-      r: rot,
-      rx: rx,
-      ry: ry
-    });
-  }
-  return keys;
-}
-
 // キーの回転を計算
 function rotatePoint(x, y, rx, ry, angle) {
   const rad = (angle * Math.PI) / 180;
