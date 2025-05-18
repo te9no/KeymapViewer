@@ -15,7 +15,7 @@ function normalizeKeyLabel(label) {
     LBRACKET: '[', RBRACKET: ']', SEMI: ';', SQT: '\'',
     BSLH: '\\', YEN: '\\', COMMA: ',', DOT: '.',
     FSLH: '/', LBKT : '{', RBKT: '}', ALPHANUMERIC: 'CAPS', COLON : ':',
-    DELETE : 'DEL', PGUP: 'PGUP', PGDN: 'PGDN',PRINTSCREEN : 'PSCRN',
+    DELETE : 'DEL', PAGEUP: 'PGUP', PAGEDN: 'PGDOWN',PRINTSCREEN : 'PSCRN',
   };
   return keyMapping[label] || label;
 }
@@ -346,7 +346,8 @@ canvas.addEventListener('keydown', function(e) {
     e.key === 'PageUp' ||
     e.key === 'PageDown' ||
     e.key === 'Home' ||
-    e.key === 'End'
+    e.key === 'End' ||
+    e.key === 'F1'    // F1キーを追加
   ) {
     e.preventDefault();
   }
@@ -366,7 +367,21 @@ canvas.addEventListener('keyup', function(e) {
     e.key === 'PageUp' ||
     e.key === 'PageDown' ||
     e.key === 'Home' ||
-    e.key === 'End'
+    e.key === 'End' ||
+    e.key === 'F1'  ||
+    e.key === 'F2'  || // F2キーを追加
+    e.key === 'F3'  || // F3キーを追加
+    e.key === 'F4'  || // F4キーを追加
+    e.key === 'F5'  || // F5キーを追加
+    e.key === 'F6'  || // F6キーを追加
+    e.key === 'F7'  || // F7キーを追加
+    e.key === 'F8'  || // F8キーを追加
+    e.key === 'F9'  || // F9キーを追加
+    e.key === 'F10' || // F10キーを追加
+    e.key === 'F11' || // F11キーを追加
+    e.key === 'F12' 
+    
+
   ) {
     e.preventDefault();
   }
