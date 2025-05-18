@@ -138,6 +138,8 @@ function parseKeymapMacro(keymapText) {
 // レイヤー選択UIの更新
 function updateLayerSelector(layers) {
   const selector = document.getElementById('layer-select');
+  const currentValue = selector ? selector.value : null; // 現在の選択値を保持
+
   if (!selector) {
     const frame = document.getElementById('canvas-frame');
     const controlDiv = document.createElement('div');
@@ -150,7 +152,7 @@ function updateLayerSelector(layers) {
     const select = document.createElement('select');
     select.id = 'layer-select';
     select.onchange = function() {
-      redraw();
+      redraw(true); // レイヤー変更時は強制的に再描画
     };
     controlDiv.appendChild(select);
     
@@ -158,6 +160,7 @@ function updateLayerSelector(layers) {
   }
 
   const select = document.getElementById('layer-select');
+  const oldLength = select.options.length;
   select.innerHTML = '';
   
   Object.values(layers).forEach(layer => {
@@ -166,6 +169,13 @@ function updateLayerSelector(layers) {
     option.textContent = `${layer.label} (${layer.name})`;
     select.appendChild(option);
   });
+
+  // 以前選択されていた値を復元
+  if (currentValue && select.options.length === oldLength) {
+    select.value = currentValue;
+  }
+
+  return select.value; // 現在選択されているレイヤー名を返す
 }
 
 // キー描画
@@ -364,19 +374,18 @@ canvas.addEventListener('blur', function() {
 canvas.focus();
 
 // 再描画関数を修正
-function redraw() {
+function redraw(forceUpdate = false) {
   console.log("redraw called");
   const jsonText = document.getElementById('json-text').value;
   const keymapText = document.getElementById('keymap-text').value;
   const keyPositions = parseJsonLayout(jsonText);
   const layers = parseKeymapMacro(keymapText);
   
-  // レイヤー選択UIの更新
-  updateLayerSelector(layers);
+  // レイヤー選択UIの更新（現在の選択を保持）
+  const currentLayer = updateLayerSelector(layers);
   
   // 選択されているレイヤーのキーマップを取得
-  const layerSelect = document.getElementById('layer-select');
-  const selectedLayer = layers[layerSelect.value];
+  const selectedLayer = layers[currentLayer];
   const keymap = selectedLayer ? selectedLayer.keys : [];
   
   const canvasElem = document.getElementById('key-canvas');
