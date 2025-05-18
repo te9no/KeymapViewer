@@ -1,5 +1,0 @@
-streamlit
-pillow
-streamlit-javascript
-st_autorefresh
-streamlit_js_eval
