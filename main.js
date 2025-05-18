@@ -203,7 +203,7 @@ function drawKeys(ctx, keyPositions, keymap, scaleFactor) {
     blue:    { normal: '#b3e0ff',   special: '#eaf6fb', pressed: '#ffb347' },
     green:   { normal: '#b2f2c9',   special: '#eafbf0', pressed: '#ffe066' },
     console: { normal: '#003300',   special: '#001a00', pressed: '#00ff00' },
-    myakumyaku: { normal: '#ffd1dc', special: '#ffe4e1', pressed: '#ff69b4' }  // ミャクミャク様風テーマ
+    myakumyaku: { normal: '#ff0000', special: '#0066cc', pressed: '#ff69b4' }  // ミャクミャク様風テーマ（赤と青）
   };
   const colors = themeColors[theme];
 
@@ -262,7 +262,9 @@ function drawKeys(ctx, keyPositions, keymap, scaleFactor) {
     ctx.fillRect(-w / 2, -h / 2, w, h);
     ctx.strokeStyle = 'gray';
     ctx.strokeRect(-w / 2, -h / 2, w, h);
-    ctx.fillStyle = (theme === 'console') ? '#00ff00' : 'black';
+    ctx.fillStyle = (theme === 'console') ? '#00ff00' : 
+                   (theme === 'myakumyaku') ? (label === '---' ? 'white' : '#ffffff') : 
+                   'black';
     ctx.font = `${Math.max(8, 12 * scaleFactor)}px Hackgen, monospace, sans-serif`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
