@@ -83,6 +83,23 @@ function drawKeys(ctx, keyPositions, keymap, scaleFactor) {
     return;
   }
 
+  // テーマごとの色設定
+  let theme = document.body.classList.contains('dark') ? 'dark'
+    : document.body.classList.contains('blue') ? 'blue'
+    : document.body.classList.contains('green') ? 'green'
+    : document.body.classList.contains('console') ? 'console'
+    : 'light';
+
+  // テーマごとの色
+  const themeColors = {
+    light:   { normal: 'lightgray', special: '#dddddd', pressed: 'orange' },
+    dark:    { normal: '#444',      special: '#222',    pressed: 'orange' },
+    blue:    { normal: '#b3e0ff',   special: '#eaf6fb', pressed: '#ffb347' },
+    green:   { normal: '#b2f2c9',   special: '#eafbf0', pressed: '#ffe066' },
+    console: { normal: '#003300',   special: '#001a00', pressed: '#00ff00' }
+  };
+  const colors = themeColors[theme];
+
   const minX = Math.min(...keyPositions.map(k => k.x));
   const minY = Math.min(...keyPositions.map(k => k.y));
   const maxX = Math.max(...keyPositions.map(k => k.x + k.w));
@@ -113,12 +130,12 @@ function drawKeys(ctx, keyPositions, keymap, scaleFactor) {
     const label = normalizeKeyLabel(keymap[i] || '?');
 
     // 押下状態による色分け
-    let fillStyle = 'lightgray';
+    let fillStyle = colors.normal;
     if (label === '---') {
-      fillStyle = '#dddddd';
+      fillStyle = colors.special;
     }
     if (keyStates[label]) {
-      fillStyle = 'orange';
+      fillStyle = colors.pressed;
     }
 
     ctx.save();
@@ -128,8 +145,8 @@ function drawKeys(ctx, keyPositions, keymap, scaleFactor) {
     ctx.fillRect(-w / 2, -h / 2, w, h);
     ctx.strokeStyle = 'gray';
     ctx.strokeRect(-w / 2, -h / 2, w, h);
-    ctx.fillStyle = 'black';
-    ctx.font = `${Math.max(8, 12 * scaleFactor)}px Hackgen, sans-serif`;
+    ctx.fillStyle = (theme === 'console') ? '#00ff00' : 'black';
+    ctx.font = `${Math.max(8, 12 * scaleFactor)}px Hackgen, monospace, sans-serif`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText(label, 0, 0);
