@@ -185,12 +185,12 @@ function drawKeys(ctx, keyPositions, keymap, scaleFactor) {
   else if (document.body.classList.contains('myakumyaku')) theme = 'myakumyaku';
 
   const themeColors = {
-    light:   { normal: 'lightgray', special: '#dddddd', pressed: 'orange' },
-    dark:    { normal: '#444',      special: '#222',    pressed: 'orange' },
-    blue:    { normal: '#b3e0ff',   special: '#eaf6fb', pressed: '#ffb347' },
-    green:   { normal: '#b2f2c9',   special: '#eafbf0', pressed: '#ffe066' },
-    console: { normal: '#003300',   special: '#001a00', pressed: '#00ff00' },
-    myakumyaku: { normal: '#ff0000', special: '#0066cc', pressed: '#ff69b4' }  // ミャクミャク様風テーマ（赤と青）
+    light:   { normal: '#f3f4f6', special: '#e5e7eb', pressed: '#fef3c7', stroke: '#9ca3af' },
+    dark:    { normal: '#374151', special: '#1f2937', pressed: '#92400e', stroke: '#6b7280' },
+    blue:    { normal: '#dbeafe', special: '#bfdbfe', pressed: '#ffb347', stroke: '#60a5fa' },
+    green:   { normal: '#d1fae5', special: '#a7f3d0', pressed: '#ffe066', stroke: '#34d399' },
+    console: { normal: '#003300', special: '#001a00', pressed: '#00ff00', stroke: '#00ff00' },
+    myakumyaku: { normal: '#ff0000', special: '#0066cc', pressed: '#ff69b4', stroke: '#ffffff' }
   };
   const colors = themeColors[theme];
 
@@ -242,23 +242,40 @@ function drawKeys(ctx, keyPositions, keymap, scaleFactor) {
       fillStyle = colors.pressed;
     }
 
+    // キーの影を追加
     ctx.save();
     ctx.translate(x + w / 2, y + h / 2);
     ctx.rotate((r * Math.PI) / 180);
+    
+    // 影を描画
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.1)';
+    ctx.shadowBlur = 4;
+    ctx.shadowOffsetX = 2;
+    ctx.shadowOffsetY = 2;
+    
+    // キーの本体を描画
     ctx.fillStyle = fillStyle;
-    ctx.fillRect(-w / 2, -h / 2, w, h);
-    ctx.strokeStyle = 'gray';
-    ctx.strokeRect(-w / 2, -h / 2, w, h);
+    ctx.beginPath();
+    ctx.roundRect(-w / 2, -h / 2, w, h, 4); // 角を丸くする
+    ctx.fill();
+    
+    // 枠線を描画
+    ctx.strokeStyle = colors.stroke;
+    ctx.lineWidth = 1.5;
+    ctx.roundRect(-w / 2, -h / 2, w, h, 4);
+    ctx.stroke();
+
+    // テキストを描画
+    ctx.shadowColor = 'transparent'; // テキストには影を付けない
     ctx.fillStyle = (theme === 'console') ? '#00ff00' : 
                    (theme === 'myakumyaku') ? (label === '---' ? 'white' : '#ffffff') : 
-                   'black';
-    ctx.font = `${Math.max(8, 12 * scaleFactor)}px Hackgen, monospace, sans-serif`;
+                   theme === 'dark' ? '#ffffff' : '#1f2937';
+    ctx.font = `${Math.max(8, 12 * scaleFactor)}px Inter, sans-serif`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText(label, 0, 0);
+    
     ctx.restore();
-
-    // console.log(`drawKeys: drawing key ${label} at (${x},${y}) size (${w},${h}) r=${r} pressed=${keyStates[label]}`);
 
     // キーの位置情報を保存（押下判定用）
     keyRects.push({ label, x, y, w, h, r });
