@@ -76,9 +76,13 @@ function parseKeymapMacro(keymapText) {
 
 // キー描画
 function drawKeys(ctx, keyPositions, keymap, scaleFactor) {
+  console.log("drawKeys called", { keyPositions, keymap, scaleFactor });
   ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
   keyRects = [];
-  if (!keyPositions.length || !keymap.length) return;
+  if (!keyPositions.length || !keymap.length) {
+    console.log("drawKeys: keyPositions or keymap is empty");
+    return;
+  }
 
   const minX = Math.min(...keyPositions.map(k => k.x));
   const minY = Math.min(...keyPositions.map(k => k.y));
@@ -132,6 +136,8 @@ function drawKeys(ctx, keyPositions, keymap, scaleFactor) {
     ctx.fillText(label, 0, 0);
     ctx.restore();
 
+    console.log(`drawKeys: drawing key ${label} at (${x},${y}) size (${w},${h}) r=${r} pressed=${keyStates[label]}`);
+
     // キーの位置情報を保存（押下判定用）
     keyRects.push({ label, x, y, w, h, r });
     // 初期化
@@ -141,11 +147,13 @@ function drawKeys(ctx, keyPositions, keymap, scaleFactor) {
 
 // ログ表示
 function updateLog(msg) {
+  console.log("updateLog:", msg);
   document.getElementById('log-label').textContent = msg;
 }
 
 // イベントバインド
 document.getElementById('update-btn').onclick = function() {
+  console.log("update-btn clicked");
   const jsonText = document.getElementById('json-text').value;
   const keymapText = document.getElementById('keymap-text').value;
   const keyPositions = parseJsonLayout(jsonText);
@@ -165,6 +173,7 @@ const canvas = document.getElementById('key-canvas');
 canvas.tabIndex = 0; // フォーカス可能に
 canvas.addEventListener('keydown', function(e) {
   const key = mapKeyEventToLabel(e);
+  console.log("keydown event:", e, "mapped key:", key);
   if (!key) return;
   keyStates[key] = true;
   redraw();
@@ -172,12 +181,14 @@ canvas.addEventListener('keydown', function(e) {
 });
 canvas.addEventListener('keyup', function(e) {
   const key = mapKeyEventToLabel(e);
+  console.log("keyup event:", e, "mapped key:", key);
   if (!key) return;
   keyStates[key] = false;
   redraw();
   updateLog(`Key Released: ${key}`);
 });
 canvas.addEventListener('blur', function() {
+  console.log("canvas blur: reset all key states");
   // フォーカス外れたら全キーリセット
   Object.keys(keyStates).forEach(k => keyStates[k] = false);
   redraw();
@@ -186,6 +197,7 @@ canvas.focus();
 
 // 再描画関数
 function redraw() {
+  console.log("redraw called");
   const jsonText = document.getElementById('json-text').value;
   const keymapText = document.getElementById('keymap-text').value;
   const keyPositions = parseJsonLayout(jsonText);
@@ -219,5 +231,7 @@ function mapKeyEventToLabel(e) {
   if (key === ';') key = ';';
   if (key === ':') key = ':';
   // 正規化
-  return normalizeKeyLabel(key);
+  const normalized = normalizeKeyLabel(key);
+  console.log("mapKeyEventToLabel:", e.key, "->", normalized);
+  return normalized;
 }
