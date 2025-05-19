@@ -23,6 +23,19 @@ function normalizeKeyLabel(label) {
 // JSONレイアウトパース
 function parseJsonLayout(text) {
   // ZMK形式かどうかを判定
+  if (text.includes('compatible = "zmk,physical-layout"')) {
+    const keys = parseZmkPhysicalLayout(text);
+    return keys.map(key => ({
+      x: key.x,
+      y: key.y,
+      w: key.w,
+      h: key.h,
+      r: key.r,
+      rx: key.rx,
+      ry: key.ry
+    }));
+  }
+
   if (text.includes('compatible = "zmk,keymap"')) {
     return parseZmkLayout(text);
   }
@@ -87,6 +100,25 @@ function parseZmkLayout(text) {
     if (keyDefs.length > 0) y++;
   });
 
+  return keys;
+}
+
+// ZMK物理レイアウトパース
+function parseZmkPhysicalLayout(text) {
+  const keys = [];
+  const physicalMatch = text.match(/keys\s*=\s*<([^;]+);/);
+  if (!physicalMatch) return [];
+
+  const keyLines = physicalMatch[1].split('\n');
+  keyLines.forEach(line => {
+    const match = line.match(/&key_physical_attrs\s+(\d+)\s+(\d+)\s+(-?\d+)\s+(-?\d+)\s+(-?\d+)\s+(-?\d+)\s+(-?\d+)/);
+    if (match) {
+      const [_, w, h, x, y, r, rx, ry] = match.map(Number);
+      keys.push({
+        w, h, x, y, r, rx, ry
+      });
+    }
+  });
   return keys;
 }
 
