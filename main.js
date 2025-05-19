@@ -98,7 +98,7 @@ function parseZmkPhysicalLayout(text) {
   console.log("parseZmkPhysicalLayout called");
 
   // レイアウトブロック全体を抽出
-  const layoutMatch = text.match(/layout_\w+\s*:\s*layout_\w+\s*{[^}]*keys\s*=[^;]*;/);
+  const layoutMatch = text.match(/layout_\w+\s*:\s*layout_\w+\s*/);
   if (!layoutMatch) {
     console.log("No layout block found");
     return [];
