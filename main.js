@@ -97,6 +97,7 @@ function parseZmkPhysicalLayout(text) {
   const keys = [];
   const physicalMatch = text.match(/keys\s*=\s*<([^;]+);/);
   if (!physicalMatch) return [];
+  console.log("parseZmkPhysicalLayout:", physicalMatch[1]);
 
   const keyLines = physicalMatch[1].split('\n');
   keyLines.forEach(line => {
@@ -104,6 +105,7 @@ function parseZmkPhysicalLayout(text) {
     const match = line.match(/&key_physical_attrs\s+(\d+)\s+(\d+)\s+(-?\d+|\(-\d+\))\s+(-?\d+|\(-\d+\))\s+(-?\d+|\(-\d+\))\s+(-?\d+|\(-\d+\))\s+(-?\d+|\(-\d+\))/);
     if (match) {
       // 括弧を除去して数値に変換
+      console.log("Matched:", match);
       const values = match.slice(1).map(v => parseInt(v.replace(/[()]/g, ''), 10));
       const [w, h, x, y, r, rx, ry] = values;
       keys.push({
