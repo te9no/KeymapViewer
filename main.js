@@ -1,6 +1,9 @@
 // キー状態管理
 let keyStates = {};
 let keyRects = []; // キーごとの描画情報
+let lastPressedKeyCenter = null; // 最後に押されたキーの中心座標
+let currentTheme = 'light';
+let animationFrameId = null;
 
 // キーラベル正規化
 function normalizeKeyLabel(label) {
@@ -201,8 +204,6 @@ function updateLayerSelector(layers) {
   const currentValue = selector ? selector.value : null; // 現在の選択値を保持
 
   if (!selector) {
-    const frame = document.getElementById('canvas-frame');
-    const controlDiv = document.createElement('div');
     controlDiv.style.marginBottom = '10px';
     
     const label = document.createElement('label');
@@ -262,6 +263,7 @@ function drawKeys(ctx, keyPositions, keymap, scaleFactor) {
   else if (document.body.classList.contains('green')) theme = 'green';
   else if (document.body.classList.contains('console')) theme = 'console';
   else if (document.body.classList.contains('myakumyaku')) theme = 'myakumyaku';
+  else if (document.body.classList.contains('psychedelic')) theme = 'psychedelic';
 
   const themeColors = {
     light:   { normal: '#f3f4f6', special: '#e5e7eb', pressed: '#fef3c7', stroke: '#9ca3af', bg: '#ffffff', text: '#1f2937' },
@@ -269,13 +271,48 @@ function drawKeys(ctx, keyPositions, keymap, scaleFactor) {
     blue:    { normal: '#dbeafe', special: '#bfdbfe', pressed: '#ffb347', stroke: '#60a5fa', bg: '#eff6ff', text: '#1e40af' },
     green:   { normal: '#d1fae5', special: '#a7f3d0', pressed: '#ffe066', stroke: '#34d399', bg: '#ecfdf5', text: '#065f46' },
     console: { normal: '#003300', special: '#001a00', pressed: '#00ff00', stroke: '#00ff00', bg: '#000000', text: '#00ff00' },
-    myakumyaku: { normal: '#ff0000', special: '#0066cc', pressed: '#ff69b4', stroke: '#ffffff', bg: '#0066cc', text: '#ffffff' }
+    myakumyaku: { normal: '#ff0000', special: '#0066cc', pressed: '#ff69b4', stroke: '#ffffff', bg: '#0066cc', text: '#ffffff' },
+    psychedelic: { 
+      normal: '#ff1493', 
+      special: '#00ff00', 
+      pressed: '#ff00ff',
+      stroke: '#ffffff',
+      bg: 'rainbow',  // 特別な背景指定
+      text: '#ffffff'
+    }
   };
   const colors = themeColors[theme];
 
   // 背景色をテーマに応じて設定
-  ctx.fillStyle = colors.bg;
-  ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+  if (theme === 'psychedelic') {
+    // グラデーション背景
+    const gradient = ctx.createLinearGradient(0, 0, ctx.canvas.width, ctx.canvas.height);
+    const time = Date.now() / 1000;
+    gradient.addColorStop(0, `hsl(${(time * 50) % 360}, 100%, 50%)`);
+    gradient.addColorStop(0.5, `hsl(${(time * 50 + 120) % 360}, 100%, 50%)`);
+    gradient.addColorStop(1, `hsl(${(time * 50 + 240) % 360}, 100%, 50%)`);
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    
+    // 波紋エフェクト - キーが押された位置から発生
+    if (lastPressedKeyCenter) {
+      const maxRadius = Math.max(ctx.canvas.width, ctx.canvas.height);
+      for (let i = 0; i < 5; i++) {
+        const radius = ((time * 100 + i * 50) % maxRadius);
+        ctx.beginPath();
+        ctx.arc(lastPressedKeyCenter.x, lastPressedKeyCenter.y, radius, 0, Math.PI * 2);
+        ctx.strokeStyle = `hsla(${(time * 100 + i * 72) % 360}, 100%, 50%, ${0.5 - i * 0.1})`;
+        ctx.lineWidth = 3;
+        ctx.stroke();
+      }
+    }
+  } else if (document.body.classList.contains('myakumyaku')) {
+    ctx.fillStyle = '#0066cc';  // ミャクミャク様テーマの時は青背景
+    ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+  } else {
+    ctx.fillStyle = colors.bg;
+    ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+  }
 
   const minX = Math.min(...keyPositions.map(k => k.x));
   const minY = Math.min(...keyPositions.map(k => k.y));
@@ -415,14 +452,25 @@ window.addEventListener('resize', resizeCanvas);
 // テーマ切り替え
 const themeSelect = document.getElementById('theme-select');
 function setTheme(theme) {
-  document.body.classList.remove('light', 'dark', 'blue', 'green', 'console', 'myakumyaku');
+  document.body.classList.remove('light', 'dark', 'blue', 'green', 'console', 'myakumyaku', 'psychedelic');
   document.body.classList.add(theme);
+  lastPressedKeyCenter = null; // リセット
   console.log("Theme changed:", theme);
   resizeCanvas();
 }
 if (themeSelect) {
   themeSelect.addEventListener('change', function() {
     setTheme(this.value);
+    if (this.value === 'psychedelic') {
+      // サイケデリックモードの場合は継続的に再描画
+      function animate() {
+        if (document.body.classList.contains('psychedelic')) {
+          redraw();
+          requestAnimationFrame(animate);
+        }
+      }
+      animate();
+    }
     resizeCanvas();
   });
   // 初期テーマ
@@ -464,6 +512,16 @@ canvas.addEventListener('keydown', function(e) {
   console.log("keydown event:", e, "mapped key:", key);
   if (!key) return;
   keyStates[key] = true;
+  
+  // 押されたキーの中心位置を取得
+  const keyRect = keyRects.find(r => r.label === key);
+  if (keyRect && theme === 'psychedelic') {
+    lastPressedKeyCenter = {
+      x: keyRect.x + keyRect.w / 2,
+      y: keyRect.y + keyRect.h / 2
+    };
+  }
+  
   redraw();
   updateLog(`Key Pressed: ${key}`);
 });
