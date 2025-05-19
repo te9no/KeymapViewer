@@ -100,10 +100,12 @@ function parseZmkPhysicalLayout(text) {
 
   const keyLines = physicalMatch[1].split('\n');
   keyLines.forEach(line => {
-    const match = line.match(/&key_physical_attrs\s+(\d+)\s+(\d+)\s+(-?\d+)\s+(-?\d+)\s+(-?\d+)\s+(-?\d+)\s+(-?\d+)/);
+    // 正規表現を修正して括弧付きの負の値に対応
+    const match = line.match(/&key_physical_attrs\s+(\d+)\s+(\d+)\s+(-?\d+|\(-\d+\))\s+(-?\d+|\(-\d+\))\s+(-?\d+|\(-\d+\))\s+(-?\d+|\(-\d+\))\s+(-?\d+|\(-\d+\))/);
     if (match) {
-      // 値を適切なスケールで変換
-      const [_, w, h, x, y, r, rx, ry] = match.map(v => parseInt(v, 10));
+      // 括弧を除去して数値に変換
+      const values = match.slice(1).map(v => parseInt(v.replace(/[()]/g, ''), 10));
+      const [w, h, x, y, r, rx, ry] = values;
       keys.push({
         w: w,         // 幅はそのまま
         h: h,         // 高さはそのまま
