@@ -97,28 +97,20 @@ function parseZmkPhysicalLayout(text) {
   const keys = [];
   const physicalMatch = text.match(/keys\s*=\s*<([^;]+);/);
   if (!physicalMatch) return [];
-  console.log("parseZmkPhysicalLayout:", physicalMatch[1]);
 
   const keyLines = physicalMatch[1].split('\n');
-  keyLines.forEach(line => {
-    // 正規表現を修正して括弧付きの負の値に対応
-    const match = line.match(/&key_physical_attrs\s+(\d+)\s+(\d+)\s+(-?\d+|\(-\d+\))\s+(-?\d+|\(-\d+\))\s+(-?\d+|\(-\d+\))\s+(-?\d+|\(-\d+\))\s+(-?\d+|\(-\d+\))/);
-    if (match) {
-      // 括弧を除去して数値に変換
-      console.log("Matched:", match);
-      const values = match.slice(1).map(v => parseInt(v.replace(/[()]/g, ''), 10));
-      const [w, h, x, y, r, rx, ry] = values;
-      keys.push({
-        w: w,         // 幅はそのまま
-        h: h,         // 高さはそのまま
-        x: x,         // X座標はそのまま
-        y: y,         // Y座標はそのまま
-        r: r / 100,   // 角度は100で割る
-        rx: rx,       // 回転中心Xはそのまま
-        ry: ry        // 回転中心Yはそのまま
-      });
-    }
-  });
+  const keyPattern = /&key_physical_attrs\s+(\d+)\s+(\d+)\s+(-?\d+|\(-\d+\))\s+(-?\d+|\(-\d+\))\s+(-?\d+|\(-\d+\))\s+(-?\d+|\(-\d+\))\s+(-?\d+|\(-\d+\))/g;
+  let match;
+  
+  while ((match = keyPattern.exec(text)) !== null) {
+    const values = match.slice(1).map(v => parseInt(v.replace(/[()]/g, ''), 10));
+    const [w, h, x, y, r, rx, ry] = values;
+    keys.push({
+      w, h, x, y,
+      r: r / 100,
+      rx, ry
+    });
+  }
   return keys;
 }
 
