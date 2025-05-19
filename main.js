@@ -95,6 +95,7 @@ function parseZmkLayout(text) {
 // ZMK物理レイアウトパース
 function parseZmkPhysicalLayout(text) {
   const keys = [];
+  console.log("parseZmkPhysicalLayout called");
   const physicalMatch = text.match(/keys\s*=\s*<([^;]+);/);
   if (!physicalMatch) return [];
 
@@ -103,6 +104,7 @@ function parseZmkPhysicalLayout(text) {
   let match;
   
   while ((match = keyPattern.exec(text)) !== null) {
+    console.log("Key match found:", match);
     const values = match.slice(1).map(v => parseInt(v.replace(/[()]/g, ''), 10));
     const [w, h, x, y, r, rx, ry] = values;
     keys.push({
