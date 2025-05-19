@@ -96,7 +96,8 @@ function parseZmkLayout(text) {
 function parseZmkPhysicalLayout(text) {
   const keys = [];
   console.log("parseZmkPhysicalLayout called");
-  const physicalMatch = text.match(/keys\s*=\s*<([^;]+);/);
+
+  const physicalMatch = text.match(/zmk,physical-layout\s=/);
   if (!physicalMatch) return [];
 
   const keyLines = physicalMatch[1].split('\n');
