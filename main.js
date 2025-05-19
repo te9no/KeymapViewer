@@ -15,7 +15,7 @@ function normalizeKeyLabel(label) {
     LBRACKET: '[', RBRACKET: ']', SEMI: ';', SQT: '\'',
     BSLH: '\\', YEN: '\\', COMMA: ',', DOT: '.',
     FSLH: '/', LBKT : '{', RBKT: '}', ALPHANUMERIC: 'CAPS', COLON : ':',
-    DELETE : 'DEL', PGUP: 'PGUP', PAGEDOWN: 'PGDOWN',PRINTSCREEN : 'PSCRN',
+    DELETE : 'DEL', PAGEUP: 'PG_UP', PAGEDOWN: 'PG_DN',PRINTSCREEN : 'PSCRN',
   };
   return keyMapping[label] || label;
 }
@@ -304,9 +304,11 @@ document.getElementById('update-btn').onclick = function() {
 function resizeCanvas() {
   const canvasElem = document.getElementById('key-canvas');
   const frame = document.getElementById('canvas-frame');
-  // キャンバスの幅・高さを親要素に合わせる
+  // キャンバスの幅は親要素に合わせる
   canvasElem.width = frame.clientWidth;
-  canvasElem.height = frame.clientHeight - document.getElementById('log-label').offsetHeight;
+  // キャンバスの高さはウインドウの下端までに設定
+  const frameRect = frame.getBoundingClientRect();
+  canvasElem.height = window.innerHeight - frameRect.top - 20; // 20pxは余白
   redraw();
 }
 
