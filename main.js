@@ -256,14 +256,8 @@ function drawKeys(ctx, keyPositions, keymap, scaleFactor) {
     return;
   }
 
-  // テーマごとの色設定
-  let theme = 'light';
-  if (document.body.classList.contains('dark')) theme = 'dark';
-  else if (document.body.classList.contains('blue')) theme = 'blue';
-  else if (document.body.classList.contains('green')) theme = 'green';
-  else if (document.body.classList.contains('console')) theme = 'console';
-  else if (document.body.classList.contains('myakumyaku')) theme = 'myakumyaku';
-  else if (document.body.classList.contains('psychedelic')) theme = 'psychedelic';
+  // テーマの取得を修正
+  const theme = currentTheme;  // グローバル変数を使用
 
   const themeColors = {
     light:   { normal: '#f3f4f6', special: '#e5e7eb', pressed: '#fef3c7', stroke: '#9ca3af', bg: '#ffffff', text: '#1f2937' },
@@ -454,23 +448,29 @@ const themeSelect = document.getElementById('theme-select');
 function setTheme(theme) {
   document.body.classList.remove('light', 'dark', 'blue', 'green', 'console', 'myakumyaku', 'psychedelic');
   document.body.classList.add(theme);
-  lastPressedKeyCenter = null; // リセット
+  currentTheme = theme;  // グローバル変数を更新
+  lastPressedKeyCenter = null;
   console.log("Theme changed:", theme);
+
+  if (animationFrameId) {
+    cancelAnimationFrame(animationFrameId);
+    animationFrameId = null;
+  }
+
+  if (theme === 'psychedelic') {
+    function animate() {
+      if (document.body.classList.contains('psychedelic')) {
+        redraw();
+        animationFrameId = requestAnimationFrame(animate);
+      }
+    }
+    animate();
+  }
   resizeCanvas();
 }
 if (themeSelect) {
   themeSelect.addEventListener('change', function() {
     setTheme(this.value);
-    if (this.value === 'psychedelic') {
-      // サイケデリックモードの場合は継続的に再描画
-      function animate() {
-        if (document.body.classList.contains('psychedelic')) {
-          redraw();
-          requestAnimationFrame(animate);
-        }
-      }
-      animate();
-    }
     resizeCanvas();
   });
   // 初期テーマ
@@ -515,14 +515,16 @@ canvas.addEventListener('keydown', function(e) {
   
   // 押されたキーの中心位置を取得
   const keyRect = keyRects.find(r => r.label === key);
-  if (keyRect && theme === 'psychedelic') {
+  if (keyRect && currentTheme === 'psychedelic') {  // currentThemeを使用
     lastPressedKeyCenter = {
       x: keyRect.x + keyRect.w / 2,
       y: keyRect.y + keyRect.h / 2
     };
   }
   
-  redraw();
+  if (currentTheme !== 'psychedelic') {  // currentThemeを使用
+    redraw();
+  }
   updateLog(`Key Pressed: ${key}`);
 });
 canvas.addEventListener('keyup', function(e) {
