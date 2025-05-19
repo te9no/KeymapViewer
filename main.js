@@ -318,16 +318,20 @@ document.getElementById('update-btn').onclick = function() {
   updateLog('Layout updated successfully');
 };
 
-// ウインドウリサイズ時の処理を最適化
-let resizeTimeout = null;
-window.addEventListener('resize', function() {
-  if (resizeTimeout) {
-    clearTimeout(resizeTimeout);
-  }
-  resizeTimeout = setTimeout(function() {
-    resizeCanvas();
-  }, 100);
-});
+// キャンバスサイズをウインドウいっぱいに調整
+function resizeCanvas() {
+  const canvasElem = document.getElementById('key-canvas');
+  const frame = document.getElementById('canvas-frame');
+  // キャンバスの幅は親要素に合わせる
+  canvasElem.width = frame.clientWidth;
+  // キャンバスの高さはウインドウの下端までに設定
+  const frameRect = frame.getBoundingClientRect();
+  canvasElem.height = window.innerHeight - frameRect.top - 20; // 20pxは余白
+  redraw();
+}
+
+// ウインドウリサイズ時にキャンバスを調整
+window.addEventListener('resize', resizeCanvas);
 
 // テーマ切り替え
 const themeSelect = document.getElementById('theme-select');
