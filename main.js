@@ -94,32 +94,32 @@ function parseZmkLayout(text) {
 
 // ZMK物理レイアウトパース
 function parseZmkPhysicalLayout(text) {
-  const keys = [];
+  const keys = new Set(); // 重複を防ぐためにSetを使用
   console.log("parseZmkPhysicalLayout called");
 
-  // 物理レイアウトブロック全体を抽出
-  const physicalMatch = text.match(/layout_\w+\s*:\s*layout_\w+\s*{[^}]*}/);
-  if (!physicalMatch) {
-    console.log("No physical layout block found");
+  // レイアウトブロック全体を抽出
+  const layoutMatch = text.match(/layout_\w+\s*:\s*layout_\w+\s*{[^}]*keys\s*=[^;]*;/);
+  if (!layoutMatch) {
+    console.log("No layout block found");
     return [];
   }
 
+  const layoutBlock = layoutMatch[0];
   const keyPattern = /&key_physical_attrs\s+(\d+)\s+(\d+)\s+(-?\d+|\(-\d+\))\s+(-?\d+|\(-\d+\))\s+(-?\d+|\(-\d+\))\s+(-?\d+|\(-\d+\))\s+(-?\d+|\(-\d+\))/g;
   let match;
   
-  while ((match = keyPattern.exec(text)) !== null) {
-    console.log("Key match found:", match);
+  while ((match = keyPattern.exec(layoutBlock)) !== null) {
     const values = match.slice(1).map(v => parseInt(v.replace(/[()]/g, ''), 10));
     const [w, h, x, y, r, rx, ry] = values;
-    keys.push({
-      w, h, x, y,
-      r: r / 100,
-      rx, ry
-    });
+    // キーの一意性を確保するために文字列化
+    const keyString = JSON.stringify({w, h, x, y, r: r/100, rx, ry});
+    keys.add(keyString);
   }
 
-  console.log("Parsed keys:", keys);
-  return keys;
+  // 重複を除去したキーを配列に変換
+  const uniqueKeys = Array.from(keys).map(k => JSON.parse(k));
+  console.log("Parsed unique keys:", uniqueKeys.length);
+  return uniqueKeys;
 }
 
 // キーの回転を計算
