@@ -23,21 +23,10 @@ function normalizeKeyLabel(label) {
 // JSONレイアウトパース
 function parseJsonLayout(text) {
   // ZMK形式かどうかを判定
-  if (text.includes('compatible = "zmk,physical-layout"')) {
+  if (text.includes('compatible = "zmk,physical-layout"') || 
+      text.includes('compatible = "zmk,keymap"')) {
     const keys = parseZmkPhysicalLayout(text);
-    return keys.map(key => ({
-      x: key.x,
-      y: key.y,
-      w: key.w,
-      h: key.h,
-      r: key.r,
-      rx: key.rx,
-      ry: key.ry
-    }));
-  }
-
-  if (text.includes('compatible = "zmk,keymap"')) {
-    return parseZmkLayout(text);
+    return keys;
   }
 
   // 既存のJSON解析処理
@@ -113,12 +102,18 @@ function parseZmkPhysicalLayout(text) {
   keyLines.forEach(line => {
     const match = line.match(/&key_physical_attrs\s+(\d+)\s+(\d+)\s+(-?\d+)\s+(-?\d+)\s+(-?\d+)\s+(-?\d+)\s+(-?\d+)/);
     if (match) {
-      const [_, w, h, x, y, r, rx, ry] = match.map(Number);
+      // 値を適切なスケールで変換
+      const [_, w, h, x, y, r, rx, ry] = match.map(v => parseInt(v, 10));
       keys.push({
-        w, h, x, y, r, rx, ry
+        w: w,         // 幅はそのまま
+        h: h,         // 高さはそのまま
+        x: x,         // X座標はそのまま
+        y: y,         // Y座標はそのまま
+        r: r / 100,   // 角度は100で割る
+        rx: rx,       // 回転中心Xはそのまま
+        ry: ry        // 回転中心Yはそのまま
       });
     }
-  });
   return keys;
 }
 
