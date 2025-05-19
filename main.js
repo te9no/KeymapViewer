@@ -114,6 +114,7 @@ function parseZmkPhysicalLayout(text) {
         ry: ry        // 回転中心Yはそのまま
       });
     }
+  });
   return keys;
 }
 
