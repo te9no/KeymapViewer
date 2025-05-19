@@ -21,9 +21,15 @@ function normalizeKeyLabel(label) {
 }
 
 // JSONレイアウトパース
-function parseJsonLayout(jsonText) {
+function parseJsonLayout(text) {
+  // ZMK形式かどうかを判定
+  if (text.includes('compatible = "zmk,keymap"')) {
+    return parseZmkLayout(text);
+  }
+
+  // 既存のJSON解析処理
   try {
-    const layoutData = JSON.parse(jsonText);
+    const layoutData = JSON.parse(text);
     if (layoutData.layouts) {
       const layout = layoutData.layouts.layout_US.layout;
       return layout.map(key => ({
@@ -41,6 +47,47 @@ function parseJsonLayout(jsonText) {
     updateLog('JSON Parse Error: ' + e.message);
     return [];
   }
+}
+
+// ZMKレイアウトパース
+function parseZmkLayout(text) {
+  const keys = [];
+  let x = 0;
+  let y = 0;
+  let maxX = 0;
+
+  // bindingsブロックを抽出
+  const bindingsMatch = text.match(/bindings\s*=\s*<([^>]+)>/);
+  if (!bindingsMatch) return [];
+
+  // バインディング行を解析
+  const lines = bindingsMatch[1].split('\n');
+  lines.forEach(line => {
+    line = line.trim();
+    if (!line || line.startsWith('//')) return;
+
+    // キー定義を抽出
+    const keyDefs = line.split(/\s+/).filter(k => k.startsWith('&'));
+    keyDefs.forEach(keyDef => {
+      keys.push({
+        x: x * 100,
+        y: y * 100,
+        w: 100,
+        h: 100,
+        r: 0,
+        rx: 0,
+        ry: 0
+      });
+      x++;
+      maxX = Math.max(maxX, x);
+    });
+
+    // 行末なら次の行へ
+    x = 0;
+    if (keyDefs.length > 0) y++;
+  });
+
+  return keys;
 }
 
 // キーの回転を計算
