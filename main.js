@@ -104,11 +104,13 @@ function parseZmkPhysicalLayout(text) {
     return [];
   }
 
+  console.log("Layout block found:", layoutMatch[0]);
   const layoutBlock = layoutMatch[0];
   const keyPattern = /&key_physical_attrs\s+(\d+)\s+(\d+)\s+(-?\d+|\(-\d+\))\s+(-?\d+|\(-\d+\))\s+(-?\d+|\(-\d+\))\s+(-?\d+|\(-\d+\))\s+(-?\d+|\(-\d+\))/g;
   let match;
   
   while ((match = keyPattern.exec(layoutBlock)) !== null) {
+    console.log("Key match found:", match);
     const values = match.slice(1).map(v => parseInt(v.replace(/[()]/g, ''), 10));
     const [w, h, x, y, r, rx, ry] = values;
     // キーの一意性を確保するために文字列化
