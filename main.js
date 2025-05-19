@@ -97,10 +97,13 @@ function parseZmkPhysicalLayout(text) {
   const keys = [];
   console.log("parseZmkPhysicalLayout called");
 
-  const physicalMatch = text.match(/zmk,physical-layout\s=/);
-  if (!physicalMatch) return [];
+  // 物理レイアウトブロック全体を抽出
+  const physicalMatch = text.match(/layout_\w+\s*:\s*layout_\w+\s*{[^}]*}/);
+  if (!physicalMatch) {
+    console.log("No physical layout block found");
+    return [];
+  }
 
-  const keyLines = physicalMatch[1].split('\n');
   const keyPattern = /&key_physical_attrs\s+(\d+)\s+(\d+)\s+(-?\d+|\(-\d+\))\s+(-?\d+|\(-\d+\))\s+(-?\d+|\(-\d+\))\s+(-?\d+|\(-\d+\))\s+(-?\d+|\(-\d+\))/g;
   let match;
   
@@ -114,6 +117,8 @@ function parseZmkPhysicalLayout(text) {
       rx, ry
     });
   }
+
+  console.log("Parsed keys:", keys);
   return keys;
 }
 
