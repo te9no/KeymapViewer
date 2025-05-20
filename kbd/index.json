@@ -1,0 +1,10 @@
+{
+  "keyboards": [
+    {
+      "id": "GeaconSolstice",
+      "name": "Geacon Solstice",
+      "author": "geacon",
+      "description": "Split keyboard with 70 keys"
+    }
+  ]
+}

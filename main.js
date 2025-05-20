@@ -95,35 +95,6 @@ function parseZmkLayout(text) {
   return keys;
 }
 
-// ZMK物理レイアウトパース
-function parseZmkPhysicalLayout(text) {
-  const keys = new Set(); // 重複を防ぐためにSetを使用
-  console.log("parseZmkPhysicalLayout called");
-
-  // レイアウトブロック全体を抽出
-  const layoutMatch = text.match(/layout_\w+\s*:\s*layout_\w+\s{[^}]*keys.*\s.*=[^;]*;/g);
-  if (!layoutMatch) {
-    console.log("No layout block found");
-    return [];
-  }
-
-  const layoutBlock = layoutMatch[0];
-  const keyPattern = /&key_physical_attrs\s+(\d+)\s+(\d+)\s+(-?\d+|\(-\d+\))\s+(-?\d+|\(-\d+\))\s+(-?\d+|\(-\d+\))\s+(-?\d+|\(-\d+\))\s+(-?\d+|\(-\d+\))/g;
-  let match;
-  
-  while ((match = keyPattern.exec(layoutBlock)) !== null) {
-    const values = match.slice(1).map(v => parseInt(v.replace(/[()]/g, ''), 10));
-    const [w, h, x, y, r, rx, ry] = values;
-    // キーの一意性を確保するために文字列化
-    const keyString = JSON.stringify({w, h, x, y, r: r/100, rx, ry});
-    keys.add(keyString);
-  }
-
-  // 重複を除去したキーを配列に変換
-  const uniqueKeys = Array.from(keys).map(k => JSON.parse(k));
-  console.log("Parsed unique keys:", uniqueKeys.length);
-  return uniqueKeys;
-}
 
 // キーの回転を計算
 function rotatePoint(x, y, rx, ry, angle) {
@@ -134,68 +105,6 @@ function rotatePoint(x, y, rx, ry, angle) {
     x: rx + (dx * Math.cos(rad) - dy * Math.sin(rad)),
     y: ry + (dx * Math.sin(rad) + dy * Math.cos(rad))
   };
-}
-
-// キーマップパース（複数レイヤー対応版）
-function parseKeymapMacro(keymapText) {
-  const layers = {};
-  let currentLayer = null;
-  let inBindings = false;
-  
-  const patterns = [
-    [/&kp\s+(\S+)/, x => x],
-    [/&lt\s+\d+\s+(\S+)/, x => x],
-    [/&mt\s+\S+\s+(\S+)/, x => x],
-    [/&toJIS\s+\d+\s+(\S+)/, x => x],
-    [/&mF(\d+)/, x => `F${x}`],
-    [/&trans/, _ => 'TRANS']
-  ];
-
-  keymapText.split('\n').forEach(line => {
-    line = line.trim();
-    
-    // レイヤー開始行の検出
-    const layerMatch = line.match(/(\w+)_layer\s*{/);
-    if (layerMatch) {
-      currentLayer = layerMatch[1];
-      layers[currentLayer] = {
-        name: currentLayer,
-        label: '',
-        keys: []
-      };
-      return;
-    }
-
-    // レイヤーラベルの検出
-    const labelMatch = line.match(/label\s*=\s*"([^"]+)"/);
-    if (labelMatch && currentLayer) {
-      layers[currentLayer].label = labelMatch[1];
-      return;
-    }
-
-    if (line.includes('bindings = <')) { inBindings = true; return; }
-    if (line.includes('>;')) { inBindings = false; return; }
-    
-    if (!inBindings || !line || line.startsWith('//') || !currentLayer) return;
-
-    line.split('&').forEach(code => {
-      code = code.trim();
-      if (!code) return;
-      code = '&' + code;
-      let found = false;
-      for (const [pat, fn] of patterns) {
-        const m = code.match(pat);
-        if (m) {
-          layers[currentLayer].keys.push(fn(m[1]));
-          found = true;
-          break;
-        }
-      }
-      if (!found) layers[currentLayer].keys.push('?');
-    });
-  });
-
-  return layers;
 }
 
 // レイヤー選択UIの更新
@@ -237,163 +146,6 @@ function updateLayerSelector(layers) {
   }
 
   return select.value; // 現在選択されているレイヤー名を返す
-}
-
-// キー描画
-function drawKeys(ctx, keyPositions, keymap, scaleFactor) {
-  console.log("drawKeys called", { keyPositions, keymap, scaleFactor });
-  // 背景色をテーマに応じて設定
-  if (document.body.classList.contains('myakumyaku')) {
-    ctx.fillStyle = '#0066cc';  // ミャクミャク様テーマの時は青背景
-    ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-  } else {
-    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-  }
-  
-  keyRects = [];
-  if (!keyPositions.length || !keymap.length) {
-    console.log("drawKeys: keyPositions or keymap is empty");
-    return;
-  }
-
-  // テーマの取得を修正
-  const theme = currentTheme;  // グローバル変数を使用
-
-  const themeColors = {
-    light:   { normal: '#f3f4f6', special: '#e5e7eb', pressed: '#fef3c7', stroke: '#9ca3af', bg: '#ffffff', text: '#1f2937' },
-    dark:    { normal: '#374151', special: '#1f2937', pressed: '#92400e', stroke: '#6b7280', bg: '#111827', text: '#ffffff' },
-    blue:    { normal: '#dbeafe', special: '#bfdbfe', pressed: '#ffb347', stroke: '#60a5fa', bg: '#eff6ff', text: '#1e40af' },
-    green:   { normal: '#d1fae5', special: '#a7f3d0', pressed: '#ffe066', stroke: '#34d399', bg: '#ecfdf5', text: '#065f46' },
-    console: { normal: '#003300', special: '#001a00', pressed: '#00ff00', stroke: '#00ff00', bg: '#000000', text: '#00ff00' },
-    myakumyaku: { normal: '#ff0000', special: '#0066cc', pressed: '#ff69b4', stroke: '#ffffff', bg: '#0066cc', text: '#ffffff' },
-    psychedelic: { 
-      normal: '#ff1493', 
-      special: '#00ff00', 
-      pressed: '#ff00ff',
-      stroke: '#ffffff',
-      bg: 'rainbow',  // 特別な背景指定
-      text: '#ffffff'
-    }
-  };
-  const colors = themeColors[theme];
-
-  // 背景色をテーマに応じて設定
-  if (theme === 'psychedelic') {
-    // グラデーション背景
-    const gradient = ctx.createLinearGradient(0, 0, ctx.canvas.width, ctx.canvas.height);
-    const time = Date.now() / 1000;
-    gradient.addColorStop(0, `hsl(${(time * 50) % 360}, 100%, 50%)`);
-    gradient.addColorStop(0.5, `hsl(${(time * 50 + 120) % 360}, 100%, 50%)`);
-    gradient.addColorStop(1, `hsl(${(time * 50 + 240) % 360}, 100%, 50%)`);
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-    
-    // 波紋エフェクト - キーが押された位置から発生
-    if (lastPressedKeyCenter) {
-      const maxRadius = Math.max(ctx.canvas.width, ctx.canvas.height);
-      for (let i = 0; i < 5; i++) {
-        const radius = ((time * 100 + i * 50) % maxRadius);
-        ctx.beginPath();
-        ctx.arc(lastPressedKeyCenter.x, lastPressedKeyCenter.y, radius, 0, Math.PI * 2);
-        ctx.strokeStyle = `hsla(${(time * 100 + i * 72) % 360}, 100%, 50%, ${0.5 - i * 0.1})`;
-        ctx.lineWidth = 3;
-        ctx.stroke();
-      }
-    }
-  } else if (document.body.classList.contains('myakumyaku')) {
-    ctx.fillStyle = '#0066cc';  // ミャクミャク様テーマの時は青背景
-    ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-  } else {
-    ctx.fillStyle = colors.bg;
-    ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-  }
-
-  const minX = Math.min(...keyPositions.map(k => k.x));
-  const minY = Math.min(...keyPositions.map(k => k.y));
-  const maxX = Math.max(...keyPositions.map(k => k.x + k.w));
-  const maxY = Math.max(...keyPositions.map(k => k.y + k.h));
-
-  const layoutWidth = maxX - minX;
-  const layoutHeight = maxY - minY;
-
-  const canvasWidth = ctx.canvas.width;
-  const canvasHeight = ctx.canvas.height;
-
-  const widthScale = (canvasWidth * 0.8) / layoutWidth;
-  const heightScale = (canvasHeight * 0.8) / layoutHeight;
-  const autoScale = Math.min(widthScale, heightScale);
-
-  const keyWidth = layoutWidth * autoScale;
-  const keyHeight = layoutHeight * autoScale;
-
-  const offsetX = (canvasWidth - keyWidth) / 2 - minX * autoScale;
-  const offsetY = (canvasHeight - keyHeight) / 2 - minY * autoScale;
-
-  keyPositions.forEach((key, i) => {
-    let x = key.x;
-    let y = key.y;
-    
-    // 回転がある場合は座標を補正
-    if (key.r !== 0) {
-      const rotated = rotatePoint(x, y, key.rx, key.ry, key.r);
-      x = rotated.x;
-      y = rotated.y;
-    }
-    
-    x = x * autoScale + offsetX;
-    y = y * autoScale + offsetY;
-    const w = key.w * autoScale;
-    const h = key.h * autoScale;
-    const r = key.r;
-    const label = normalizeKeyLabel(keymap[i] || '?');
-
-    // 押下状態による色分け
-    let fillStyle = colors.normal;
-    if (label === '---') {
-      fillStyle = colors.special;
-    }
-    if (keyStates[label]) {
-      fillStyle = colors.pressed;
-    }
-
-    // キーの影を追加
-    ctx.save();
-    ctx.translate(x + w / 2, y + h / 2);
-    ctx.rotate((r * Math.PI) / 180);
-    
-    // 影を描画
-    ctx.shadowColor = 'rgba(0, 0, 0, 0.1)';
-    ctx.shadowBlur = 4;
-    ctx.shadowOffsetX = 2;
-    ctx.shadowOffsetY = 2;
-    
-    // キーの本体を描画
-    ctx.fillStyle = fillStyle;
-    ctx.beginPath();
-    ctx.roundRect(-w / 2, -h / 2, w, h, 4); // 角を丸くする
-    ctx.fill();
-    
-    // 枠線を描画
-    ctx.strokeStyle = colors.stroke;
-    ctx.lineWidth = 1.5;
-    ctx.roundRect(-w / 2, -h / 2, w, h, 4);
-    ctx.stroke();
-
-    // テキストを描画
-    ctx.shadowColor = 'transparent'; // テキストには影を付けない
-    ctx.fillStyle = colors.text;
-    ctx.font = `${Math.max(8, 12 * scaleFactor)}px Inter, sans-serif`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(label, 0, 0);
-    
-    ctx.restore();
-
-    // キーの位置情報を保存（押下判定用）
-    keyRects.push({ label, x, y, w, h, r });
-    // 初期化
-    if (!(label in keyStates)) keyStates[label] = false;
-  });
 }
 
 // ログ表示
@@ -445,7 +197,7 @@ window.addEventListener('resize', resizeCanvas);
 
 // テーマ切り替え
 const themeSelect = document.getElementById('theme-select');
-function setTheme(theme) {
+function Renderer.setTheme(theme) {
   document.body.classList.remove('light', 'dark', 'blue', 'green', 'console', 'myakumyaku', 'psychedelic');
   document.body.classList.add(theme);
   currentTheme = theme;  // グローバル変数を更新
