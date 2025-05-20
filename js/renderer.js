@@ -14,7 +14,6 @@ export function drawKeys(ctx, keyPositions, keymap, theme, keyStates, lastPresse
   }
 
   // Draw keys
-  console.log("drawKeys called", { keyPositions, keymap, theme });
   // 背景色をテーマに応じて設定
   if (document.body.classList.contains('myakumyaku')) {
     ctx.fillStyle = '#0066cc';  // ミャクミャク様テーマの時は青背景
@@ -22,9 +21,8 @@ export function drawKeys(ctx, keyPositions, keymap, theme, keyStates, lastPresse
   } else {
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
   }
-  
+
   if (!keyPositions.length || !keymap.length) {
-    console.log("drawKeys: keyPositions or keymap is empty");
     return;
   }
 
@@ -34,42 +32,12 @@ export function drawKeys(ctx, keyPositions, keymap, theme, keyStates, lastPresse
     blue:    { normal: '#dbeafe', special: '#bfdbfe', pressed: '#ffb347', stroke: '#60a5fa', bg: '#eff6ff', text: '#1e40af' },
     green:   { normal: '#d1fae5', special: '#a7f3d0', pressed: '#ffe066', stroke: '#34d399', bg: '#ecfdf5', text: '#065f46' },
     console: { normal: '#003300', special: '#001a00', pressed: '#00ff00', stroke: '#00ff00', bg: '#000000', text: '#00ff00' },
-    myakumyaku: { normal: '#ff0000', special: '#0066cc', pressed: '#ff69b4', stroke: '#ffffff', bg: '#0066cc', text: '#ffffff' },
-    psychedelic: { 
-      normal: '#ff1493', 
-      special: '#00ff00', 
-      pressed: '#ff00ff',
-      stroke: '#ffffff',
-      bg: 'rainbow',  // 特別な背景指定
-      text: '#ffffff'
-    }
+    myakumyaku: { normal: '#ff0000', special: '#0066cc', pressed: '#000000', stroke: '#ffffff', bg: '#0066cc', text: '#000000' }
   };
   const colors = themeColors[theme];
 
   // 背景色をテーマに応じて設定
-  if (theme === 'psychedelic') {
-    // グラデーション背景
-    const gradient = ctx.createLinearGradient(0, 0, ctx.canvas.width, ctx.canvas.height);
-    const time = Date.now() / 1000;
-    gradient.addColorStop(0, `hsl(${(time * 50) % 360}, 100%, 50%)`);
-    gradient.addColorStop(0.5, `hsl(${(time * 50 + 120) % 360}, 100%, 50%)`);
-    gradient.addColorStop(1, `hsl(${(time * 50 + 240) % 360}, 100%, 50%)`);
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-    
-    // 波紋エフェクト - キーが押された位置から発生
-    if (lastPressedKeyCenter) {
-      const maxRadius = Math.max(ctx.canvas.width, ctx.canvas.height);
-      for (let i = 0; i < 5; i++) {
-        const radius = ((time * 100 + i * 50) % maxRadius);
-        ctx.beginPath();
-        ctx.arc(lastPressedKeyCenter.x, lastPressedKeyCenter.y, radius, 0, Math.PI * 2);
-        ctx.strokeStyle = `hsla(${(time * 100 + i * 72) % 360}, 100%, 50%, ${0.5 - i * 0.1})`;
-        ctx.lineWidth = 3;
-        ctx.stroke();
-      }
-    }
-  } else if (document.body.classList.contains('myakumyaku')) {
+  if (document.body.classList.contains('myakumyaku')) {
     ctx.fillStyle = '#0066cc';  // ミャクミャク様テーマの時は青背景
     ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
   } else {
@@ -148,13 +116,32 @@ export function drawKeys(ctx, keyPositions, keymap, theme, keyStates, lastPresse
     ctx.roundRect(-w / 2, -h / 2, w, h, 4);
     ctx.stroke();
 
+    // ミャクミャク様テーマの場合、白い丸を描画
+    if (theme === 'myakumyaku') {
+      // 白い丸を描画
+      const circleRadius = Math.min(w, h) * 0.35;
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(0, 0, circleRadius, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // 黒い枠線を追加
+      ctx.strokeStyle = '#000000';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      // テキストは黒で描画
+      ctx.fillStyle = '#000000';
+    } else {
+      ctx.fillStyle = colors.text;
+    }
+
     // フォントサイズの調整
     const fontSize = Math.max(12, Math.min(w / 3, h / 2)) * 0.8;
     ctx.font = `${fontSize}px Inter, sans-serif`;
 
     // テキストを描画
     ctx.shadowColor = 'transparent'; // テキストには影を付けない
-    ctx.fillStyle = colors.text;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText(label, 0, 0);

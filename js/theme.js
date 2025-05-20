@@ -4,15 +4,7 @@ export const themeColors = {
   blue:    { normal: '#dbeafe', special: '#bfdbfe', pressed: '#ffb347', stroke: '#60a5fa', bg: '#eff6ff', text: '#1e40af' },
   green:   { normal: '#d1fae5', special: '#a7f3d0', pressed: '#ffe066', stroke: '#34d399', bg: '#ecfdf5', text: '#065f46' },
   console: { normal: '#003300', special: '#001a00', pressed: '#00ff00', stroke: '#00ff00', bg: '#000000', text: '#00ff00' },
-  myakumyaku: { normal: '#ff0000', special: '#0066cc', pressed: '#ff69b4', stroke: '#ffffff', bg: '#0066cc', text: '#ffffff' },
-  psychedelic: { 
-    normal: '#ff1493', 
-    special: '#00ff00', 
-    pressed: '#ff00ff',
-    stroke: '#ffffff',
-    bg: 'rainbow',
-    text: '#ffffff'
-  }
+  myakumyaku: { normal: '#ff0000', special: '#0066cc', pressed: '#000000', stroke: '#ffffff', bg: '#0066cc', text: '#000000' }
 };
 
 export let currentTheme = 'light';
@@ -24,12 +16,58 @@ export function setCurrentTheme(theme) {
 
 export function setTheme(theme, onRedraw) {
   // Remove theme classes
-  document.documentElement.classList.remove('light', 'dark', 'blue', 'green', 'console', 'myakumyaku', 'psychedelic');
-  document.body.classList.remove('light', 'dark', 'blue', 'green', 'console', 'myakumyaku', 'psychedelic');
+  document.documentElement.classList.remove('light', 'dark', 'blue', 'green', 'console', 'myakumyaku');
+  document.body.classList.remove('light', 'dark', 'blue', 'green', 'console', 'myakumyaku');
   
   // Add theme class
   document.documentElement.classList.add(theme);
   document.body.classList.add(theme);
+
+  // Toggle wave ripple elements
+  const ripples = ['wave-ripple-1', 'wave-ripple-2', 'wave-ripple-3'];
+  ripples.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) {
+      const div = document.createElement('div');
+      div.id = id;
+      div.className = 'absolute inset-0 rounded-lg opacity-50';
+      div.style.animation = `wave-ripple 3s infinite ${-ripples.indexOf(id)}s`;
+      document.getElementById('canvas-frame').prepend(div);
+    }
+  });
+
+  // Add wave ripple animation style if not exists
+  if (!document.getElementById('wave-ripple-style')) {
+    const style = document.createElement('style');
+    style.id = 'wave-ripple-style';
+    style.textContent = `
+      @keyframes wave-ripple {
+        0% {
+          border: 4px solid rgba(255, 0, 0, 0.5);
+          transform: scale(1);
+        }
+        33% {
+          border: 4px solid rgba(0, 255, 0, 0.5);
+        }
+        66% {
+          border: 4px solid rgba(0, 0, 255, 0.5);
+        }
+        100% {
+          border: 4px solid rgba(255, 0, 0, 0.5);
+          transform: scale(1.2);
+        }
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  // Toggle wave ripple visibility
+  ripples.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.style.display = theme === 'psychedelic' ? 'block' : 'none';
+    }
+  });
   
   // Apply theme colors
   const colors = themeColors[theme];

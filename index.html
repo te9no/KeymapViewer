@@ -1,12 +1,25 @@
 <!DOCTYPE html>
-<html lang="ja" class="h-full bg-gray-900">
+<html lang="ja" class="h-full bg-gray-100 dark:bg-gray-900">
 <head>
   <meta charset="UTF-8">
   <title>KeymapViewer for Web</title>
-  <link href="css/output.css" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['Hackgen', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
 </head>
-<body class="h-full dark">
+<body class="h-full">
   <div class="min-h-full flex flex-col">
     <nav class="bg-white shadow-sm dark:bg-gray-800">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -23,40 +36,46 @@
             <select id="layer-select" class="block rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6 dark:bg-gray-700 dark:text-white dark:ring-gray-600">
             </select>
             <select id="theme-select" class="block rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6 dark:bg-gray-700 dark:text-white dark:ring-gray-600">
-              <option value="dark" selected>🌙 Dark</option>
               <option value="light">☀️ Light</option>
+              <option value="dark">🌙 Dark</option>
               <option value="blue">🔵 Blue</option>
               <option value="green">🟢 Green</option>
               <option value="console">🖥️ Console</option>
               <option value="myakumyaku">💕 Myakumyaku</option>
-              <option value="psychedelic">🌈 Psychedelic</option>
             </select>
           </div>
         </div>
       </div>
     </nav>
 
-    <div class="flex-1 flex flex-col bg-gray-900">
+    <div class="flex-1 flex flex-col">
       <div class="mx-auto w-full max-w-7xl py-6 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-2 gap-6">
-          <div class="bg-gray-800 rounded-lg p-4">
-            <label class="block text-sm font-medium text-white mb-2">Layout JSON or ZMK PhysicalLayout</label>
-            <textarea id="json-text" class="w-full h-[300px] resize-none rounded-md border-0 py-1.5 text-white bg-gray-700 shadow-sm ring-1 ring-inset ring-gray-600 focus:ring-2 focus:ring-indigo-600 text-sm font-mono leading-6"></textarea>
+        <div class="px-4 sm:px-0">
+          <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+            <div class="overflow-hidden rounded-lg bg-white shadow dark:bg-gray-800">
+              <div class="p-4">
+                <label class="block text-sm font-medium text-gray-900 dark:text-white">Layout JSON or ZMK PhysicalLayout</label>
+                <textarea id="json-text" rows="5" class="mt-2 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6 font-mono dark:bg-gray-700 dark:text-white dark:ring-gray-600"></textarea>
+              </div>
+            </div>
+            <div class="overflow-hidden rounded-lg bg-white shadow dark:bg-gray-800">
+              <div class="p-4">
+                <label class="block text-sm font-medium text-gray-900 dark:text-white">Keymap Macro</label>
+                <textarea id="keymap-text" rows="5" class="mt-2 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6 font-mono dark:bg-gray-700 dark:text-white dark:ring-gray-600"></textarea>
+              </div>
+            </div>
           </div>
-          <div class="bg-gray-800 rounded-lg p-4">
-            <label class="block text-sm font-medium text-white mb-2">Keymap Macro</label>
-            <textarea id="keymap-text" class="w-full h-[300px] resize-none rounded-md border-0 py-1.5 text-white bg-gray-700 shadow-sm ring-1 ring-inset ring-gray-600 focus:ring-2 focus:ring-indigo-600 text-sm font-mono leading-6"></textarea>
+          <div class="mt-4">
+            <button id="update-btn" type="button" class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Update Layout</button>
           </div>
         </div>
-
-        <div class="flex justify-start mt-4">
-          <button id="update-btn" type="button" class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Update Layout</button>
-        </div>
-
-        <div id="canvas-frame" class="mt-6 flex-1 flex flex-col bg-gray-800 rounded-lg overflow-hidden">
-          <div id="log-label" class="p-3 text-sm text-gray-300 border-b border-gray-700">KEY LOG</div>
+        <div id="canvas-frame" class="mt-4 flex-1 flex flex-col relative bg-white shadow dark:bg-gray-800 rounded-lg">
+          <div id="wave-ripple-1" class="absolute inset-0 rounded-lg opacity-50"></div>
+          <div id="wave-ripple-2" class="absolute inset-0 rounded-lg opacity-50"></div>
+          <div id="wave-ripple-3" class="absolute inset-0 rounded-lg opacity-50"></div>
+          <div id="log-label" class="p-2 text-sm text-gray-600 dark:text-gray-400">KEY LOG</div>
           <div class="flex-1 p-4">
-            <canvas id="key-canvas" tabindex="0" class="w-full h-full rounded-md"></canvas>
+            <canvas id="key-canvas" tabindex="0" class="w-full h-full"></canvas>
           </div>
         </div>
       </div>
