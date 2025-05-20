@@ -90,12 +90,34 @@ function redraw(forceUpdate = false) {
 // Make redraw available globally for renderer
 window.redraw = redraw;
 
+// ウインドウリサイズ時のイベントハンドラを更新
+window.addEventListener('resize', () => {
+  if (window.resizeCanvas) {
+    window.resizeCanvas();
+  }
+});
+
 // Move event listeners inside DOMContentLoaded
 window.addEventListener('DOMContentLoaded', async () => {
   try {
     keyboardManager = new KeyboardManager();
     await keyboardManager.init();
     
+    // 初期キャンバスサイズの設定
+    if (window.resizeCanvas) {
+      window.resizeCanvas();
+    }
+    
+    // キーボード選択イベントの設定
+    document.getElementById('keyboard-select').addEventListener('change', async (e) => {
+      if (e.target.value) {
+        const success = await keyboardManager.loadKeyboardConfig(e.target.value);
+        if (success) {
+          redraw(true);
+        }
+      }
+    });
+
     // Initialize empty state
     if (!document.getElementById('json-text').value) {
       document.getElementById('json-text').value = '{"layouts":{"layout_US":{"layout":[]}}}';

@@ -4,10 +4,12 @@
   "description": "Static keymap visualizer for Netlify",
   "scripts": {
     "build": "echo 'No build step required for static site.'",
-    "build:css": "tailwindcss -i ./css/input.css -o ./css/output.css",
-    "watch:css": "tailwindcss -i ./css/input.css -o ./css/output.css --watch"
+    "build:css": "tailwindcss -i ./css/input.css -o ./css/output.css --watch",
+    "watch:css": "tailwindcss -i ./css/input.css -o ./css/output.css --watch",
+    "dev": "http-server"
   },
   "devDependencies": {
-    "tailwindcss": "^3.3.0"
+    "tailwindcss": "^3.3.0",
+    "http-server": "^14.1.1"
   }
 }

@@ -44,6 +44,40 @@ export class KeyboardManager {
       select.appendChild(option);
     });
   }
+
+  async loadKeyboardConfig(keyboardId) {
+    try {
+      const kbd = this.keyboards.find(k => k.id === keyboardId);
+      if (!kbd) {
+        throw new Error('Keyboard not found');
+      }
+
+      const [layoutRes, keymapRes] = await Promise.all([
+        fetch(`kbd/${kbd.id}/${kbd.id}.json`),
+        fetch(`kbd/${kbd.id}/${kbd.id}.keymap`)
+      ]);
+
+      if (!layoutRes.ok || !keymapRes.ok) {
+        throw new Error('Failed to load keyboard files');
+      }
+
+      const [layoutJson, keymapText] = await Promise.all([
+        layoutRes.text(),
+        keymapRes.text()
+      ]);
+
+      document.getElementById('json-text').value = layoutJson;
+      document.getElementById('keymap-text').value = keymapText;
+      
+      this.currentKeyboard = kbd;
+      updateLog(`Loaded keyboard: ${kbd.name}`);
+      return true;
+    } catch (e) {
+      console.error('Failed to load keyboard config:', e);
+      updateLog('Failed to load keyboard configuration');
+      return false;
+    }
+  }
 }
 
 export function normalizeKeyLabel(label) {
@@ -73,11 +107,18 @@ export function parseJsonLayout(text) {
     }
 
     const layoutData = JSON.parse(text);
-    if (!layoutData || !layoutData.layouts || !layoutData.layouts.layout_US) {
+    if (!layoutData || !layoutData.layouts) {
       return [];
     }
 
-    const layout = layoutData.layouts.layout_US.layout || [];
+    // レイアウト名を動的に取得
+    const layoutName = Object.keys(layoutData.layouts)[0];
+    if (!layoutName) {
+      console.warn('No layout found in JSON');
+      return [];
+    }
+
+    const layout = layoutData.layouts[layoutName].layout || [];
     return layout.map(key => ({
       x: (key.x || 0) * 100,
       y: (key.y || 0) * 100,
@@ -92,28 +133,6 @@ export function parseJsonLayout(text) {
     return [];
   }
 }
-
-function parseStandardLayout(text) {
-  try {
-    const layoutData = JSON.parse(text);
-    if (layoutData.layouts) {
-      return layoutData.layouts.layout_US.layout.map(key => ({
-        x: (key.x || 0) * 100,
-        y: (key.y || 0) * 100,
-        w: (key.w || 1) * 100,
-        h: (key.h || 1) * 100,
-        r: key.r || 0,
-        rx: (key.rx || 0) * 100,
-        ry: (key.ry || 0) * 100
-      }));
-    }
-    return [];
-  } catch (e) {
-    updateLog('JSON Parse Error: ' + e.message);
-    return [];
-  }
-}
-
 
 // ZMK物理レイアウトパース
 function parseZmkPhysicalLayout(text) {
@@ -147,6 +166,10 @@ function parseZmkPhysicalLayout(text) {
 
 // キーマップパース（複数レイヤー対応版）
 export function parseKeymapMacro(keymapText) {
+  if (keymapText.includes('PROGMEM keymaps[][')) {
+    return parseQmkKeymap(keymapText);
+  }
+  
   const layers = {};
   let currentLayer = null;
   let inBindings = false;
@@ -205,5 +228,67 @@ export function parseKeymapMacro(keymapText) {
   });
 
   return layers;
+}
+
+function parseQmkKeymap(text) {
+  const layers = {};
+  const layerPattern = /\[_(\w+)\]\s*=\s*LAYOUT\(([\s\S]*?)\)/g;
+  
+  let match;
+  while ((match = layerPattern.exec(text)) !== null) {
+    const layerName = match[1];
+    const keyList = match[2]
+      .replace(/\s+/g, '')        // Remove whitespace
+      .split(',')                 // Split into keys
+      .filter(k => k.length > 0)  // Remove empty entries
+      .map(normalizeQmkKeycode);  // Normalize keycodes
+    
+    layers[layerName] = {
+      name: layerName,
+      label: layerName,
+      keys: keyList
+    };
+  }
+  
+  return layers;
+}
+
+function normalizeQmkKeycode(code) {
+  // Remove prefix
+  code = code.replace(/^KC_/, '');
+  
+  // Handle special cases
+  if (code === '_______') return 'TRANS';
+  if (code === '0x0068') return 'F13';
+  if (code === '0x0069') return 'F14';
+  
+  // Handle modifiers
+  const modPattern = /(LCTL|RCTL|LSFT|RSFT|LALT|RALT|LGUI|RGUI)\((.*?)\)/;
+  const modMatch = code.match(modPattern);
+  if (modMatch) {
+    const mod = modMatch[1].replace(/^[LR]/, ''); // Remove L/R prefix
+    const key = normalizeQmkKeycode(modMatch[2]);
+    return `${mod}+${key}`;
+  }
+  
+  // Map common keycodes
+  const qmkToZmk = {
+    'MINS': 'MINUS',
+    'EQL': 'EQUAL',
+    'LBRC': '[',
+    'RBRC': ']',
+    'QUOT': 'SQT',
+    'SLSH': 'FSLH',
+    'INT1': 'CAPS',
+    'INT3': 'INT3',
+    'MS_BTN1': 'BTN1',
+    'MS_BTN2': 'BTN2',
+    'MS_BTN3': 'BTN3',
+    'WWW_BACK': 'WWW_PREV',
+    'WWW_FORWARD': 'WWW_NEXT',
+    // Add more mappings as needed
+  };
+  
+  return qmkToZmk[code] || code;
 }
 

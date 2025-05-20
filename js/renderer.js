@@ -173,14 +173,18 @@ export function resizeCanvas() {
   const frame = document.getElementById('canvas-frame');
   if (!canvasElem || !frame) return;
 
-  // アスペクト比を維持しながらリサイズ
-  const frameWidth = frame.clientWidth;
-  const frameHeight = window.innerHeight - frame.getBoundingClientRect().top - 40;
+  // キャンバスサイズの調整
+  const frameRect = frame.getBoundingClientRect();
+  const padding = 40; // 余白
   
-  canvasElem.width = frameWidth;
-  canvasElem.height = frameHeight;
-
+  canvasElem.width = frameRect.width - padding;
+  canvasElem.height = window.innerHeight - frameRect.top - padding;
+  
+  // 再描画を要求
   if (window.redraw) {
     window.redraw();
   }
 }
+
+// グローバルにリサイズ関数を公開
+window.resizeCanvas = resizeCanvas;

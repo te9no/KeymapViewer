@@ -5,10 +5,10 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Inter', 'sans-serif'],
-        mono: ['Hackgen', 'monospace'],
-      }
-    }
+        'sans': ['Inter', 'sans-serif'],
+        'mono': ['Hackgen', 'monospace'],
+      },
+    },
   },
   plugins: [],
 }
