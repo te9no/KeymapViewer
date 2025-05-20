@@ -3,10 +3,9 @@
   "version": "1.0.0",
   "description": "Static keymap visualizer for Netlify",
   "scripts": {
-    "build": "echo 'No build step required for static site.'",
-    "build:css": "tailwindcss -i ./css/input.css -o ./css/output.css --watch",
-    "watch:css": "tailwindcss -i ./css/input.css -o ./css/output.css --watch",
-    "dev": "http-server"
+    "build": "tailwindcss -i ./css/input.css -o ./css/output.css",
+    "watch": "tailwindcss -i ./css/input.css -o ./css/output.css --watch",
+    "serve": "http-server"
   },
   "devDependencies": {
     "tailwindcss": "^3.3.0",

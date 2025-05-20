@@ -23,8 +23,28 @@ export function setCurrentTheme(theme) {
 }
 
 export function setTheme(theme, onRedraw) {
+  // Remove theme classes
+  document.documentElement.classList.remove('light', 'dark', 'blue', 'green', 'console', 'myakumyaku', 'psychedelic');
   document.body.classList.remove('light', 'dark', 'blue', 'green', 'console', 'myakumyaku', 'psychedelic');
+  
+  // Add theme class
+  document.documentElement.classList.add(theme);
   document.body.classList.add(theme);
+  
+  // Apply theme colors
+  const colors = themeColors[theme];
+  document.documentElement.style.backgroundColor = colors.bg;
+  document.documentElement.style.color = colors.text;
+  document.body.style.backgroundColor = colors.bg;
+  document.body.style.color = colors.text;
+
+  // Update textarea colors
+  const textareas = document.querySelectorAll('textarea');
+  textareas.forEach(textarea => {
+    textarea.style.backgroundColor = colors.special;
+    textarea.style.color = colors.text;
+  });
+
   setCurrentTheme(theme);
 
   if (animationFrameId) {

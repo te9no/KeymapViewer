@@ -103,6 +103,11 @@ window.addEventListener('DOMContentLoaded', async () => {
     keyboardManager = new KeyboardManager();
     await keyboardManager.init();
     
+    // Set default dark theme
+    document.documentElement.classList.add('dark');
+    document.body.classList.add('dark');
+    Theme.setTheme('dark', redraw);
+    
     // 初期キャンバスサイズの設定
     if (window.resizeCanvas) {
       window.resizeCanvas();
