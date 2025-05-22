@@ -174,44 +174,142 @@ document.getElementById('update-btn').onclick = function() {
   updateLog('Layout updated successfully');
 };
 
-// ZMK Studio風: キーボードからキーマップ・レイアウト取得
+// ZMK Studioプロトコル定義を修正
+const ZMK_PROTOCOL = {
+  REPORT_ID: 0x07,  // ZMK StudioのレポートID
+  USAGE_PAGE: 0xFF60,  // ZMK固有のusagePage
+  USAGE: 0x61,         // ZMK固有のusage
+  COMMANDS: {
+    GET_PROTOCOL_VERSION: 0x01,
+    GET_DEVICE_INFO: 0x02,
+    GET_KEYMAP: 0x03,
+    GET_LAYOUT: 0x04
+  }
+};
+
+// HIDコマンド送信関数
+async function sendZMKCommand(device, command, data = new Uint8Array(0)) {
+  const report = new Uint8Array(64);  // 64バイトレポート
+  report[0] = command;
+  report.set(data, 1);
+  console.log(`Sending command 0x${command.toString(16)}:`, hexDump(report));
+  await device.sendReport(ZMK_PROTOCOL.REPORT_ID, report);
+}
+
+// HIDレスポンス待機関数
+async function waitForZMKResponse(device) {
+  return new Promise((resolve, reject) => {
+    const cleanup = () => {
+      device.removeEventListener('inputreport', handler);
+      clearTimeout(timeoutId);
+    };
+
+    const handler = event => {
+      const data = new Uint8Array(event.data.buffer);
+      console.log("Received response:", hexDump(data));
+      cleanup();
+      resolve(data);
+    };
+
+    const timeoutId = setTimeout(() => {
+      cleanup();
+      reject(new Error('HID response timeout'));
+    }, 1000);  // タイムアウトを1秒に短縮
+
+    device.addEventListener('inputreport', handler);
+  });
+}
+
+// ZMK接続ボタンハンドラー
 document.getElementById('zmk-connect-btn').onclick = async function() {
   updateLog("ZMKデバイスに接続中...");
   try {
-    // WebHIDでZMKデバイスを選択
-    const filters = [{ vendorId: 0x0483 }]; // 例: ZMKのSTMicroelectronics
+    const filters = [
+      { 
+        vendorId: 0x1D50,
+        usagePage: ZMK_PROTOCOL.USAGE_PAGE,
+        usage: ZMK_PROTOCOL.USAGE
+      },
+      { 
+        vendorId: 0x2FE9,
+        usagePage: ZMK_PROTOCOL.USAGE_PAGE,
+        usage: ZMK_PROTOCOL.USAGE
+      }
+    ];
+    
+    // 既存のデバイスを確認
+    const existingDevices = await navigator.hid.getDevices();
+    console.log("Existing HID devices:", existingDevices);
+
     const devices = await navigator.hid.requestDevice({ filters });
     if (!devices.length) {
       updateLog("デバイスが選択されませんでした");
       return;
     }
     const device = devices[0];
+    
+    if (device.opened) await device.close();
     await device.open();
 
-    // ZMK Studioの仕様に従い、レイアウト/キーマップ情報を取得
-    // ここでは仮のコマンド・レスポンス例
-    // 実際はZMK Studioのhid.ts/usb.tsのプロトコルに合わせてください
-    // 例: レイアウト要求
-    const getLayoutCmd = new Uint8Array([0x01]); // 仮
-    await device.sendReport(0, getLayoutCmd);
-    const layoutEvent = await device.receiveReport();
-    const layoutJson = new TextDecoder().decode(layoutEvent.data.buffer);
+    try {
+      // プロトコルバージョン確認
+      await sendZMKCommand(device, ZMK_PROTOCOL.COMMANDS.GET_PROTOCOL_VERSION);
+      const version = await waitForZMKResponse(device);
+      console.log("Protocol version:", version[0]);
 
-    // 例: キーマップ要求
-    const getKeymapCmd = new Uint8Array([0x02]); // 仮
-    await device.sendReport(0, getKeymapCmd);
-    const keymapEvent = await device.receiveReport();
-    const keymapText = new TextDecoder().decode(keymapEvent.data.buffer);
+      // デバイス情報取得
+      await sendZMKCommand(device, ZMK_PROTOCOL.COMMANDS.GET_DEVICE_INFO);
+      const info = await waitForZMKResponse(device);
+      console.log("Device info:", hexDump(info));
 
-    // テキストエリアに反映
-    document.getElementById('json-text').value = layoutJson;
-    document.getElementById('keymap-text').value = keymapText;
-    updateLog("キーボードから取得完了。Update Layoutを押してください。");
+      // レイアウト取得
+      await sendZMKCommand(device, ZMK_PROTOCOL.COMMANDS.GET_LAYOUT);
+      const layout = await waitForZMKResponse(device);
+      const layoutJson = convertLayoutData(layout);
+
+      // キーマップ取得
+      await sendZMKCommand(device, ZMK_PROTOCOL.COMMANDS.GET_KEYMAP);
+      const keymap = await waitForZMKResponse(device);
+      const keymapText = convertKeymapData(keymap);
+
+      // テキストエリアに反映
+      document.getElementById('json-text').value = layoutJson;
+      document.getElementById('keymap-text').value = keymapText;
+      updateLog("キーボードから取得完了。Update Layoutを押してください。");
+    } finally {
+      await device.close();
+    }
   } catch (e) {
-    updateLog("デバイス接続エラー: " + e.message);
-    console.error(e);
+    console.error('Device connection error:', e);
+    if (e.name === 'SecurityError') {
+      updateLog("デバイスのアクセス権限がありません");
+    } else if (e.name === 'TypeError' && e.message.includes('usage')) {
+      updateLog("デバイスのHID設定が不正です");
+    } else {
+      updateLog("デバイス接続エラー: " + e.message);
+    }
   }
 };
+
+// レイアウトデータをJSON形式に変換
+function convertLayoutData(data) {
+  // ZMK Studioのレイアウトフォーマットからの変換
+  // 実際のフォーマットに合わせて実装
+  return JSON.stringify({
+    layouts: {
+      layout_US: {
+        layout: parseZMKLayout(data)
+      }
+    }
+  });
+}
+
+// キーマップデータをZMK記法に変換
+function convertKeymapData(data) {
+  // ZMK Studioのキーマップフォーマットからの変換
+  // 実際のフォーマットに合わせて実装
+  return parseZMKKeymap(data);
+}
 
 // キャンバスサイズをウインドウいっぱいに調整
 function resizeCanvas() {
