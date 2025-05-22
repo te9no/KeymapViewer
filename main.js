@@ -174,6 +174,45 @@ document.getElementById('update-btn').onclick = function() {
   updateLog('Layout updated successfully');
 };
 
+// ZMK Studio風: キーボードからキーマップ・レイアウト取得
+document.getElementById('zmk-connect-btn').onclick = async function() {
+  updateLog("ZMKデバイスに接続中...");
+  try {
+    // WebHIDでZMKデバイスを選択
+    const filters = [{ vendorId: 0x0483 }]; // 例: ZMKのSTMicroelectronics
+    const devices = await navigator.hid.requestDevice({ filters });
+    if (!devices.length) {
+      updateLog("デバイスが選択されませんでした");
+      return;
+    }
+    const device = devices[0];
+    await device.open();
+
+    // ZMK Studioの仕様に従い、レイアウト/キーマップ情報を取得
+    // ここでは仮のコマンド・レスポンス例
+    // 実際はZMK Studioのhid.ts/usb.tsのプロトコルに合わせてください
+    // 例: レイアウト要求
+    const getLayoutCmd = new Uint8Array([0x01]); // 仮
+    await device.sendReport(0, getLayoutCmd);
+    const layoutEvent = await device.receiveReport();
+    const layoutJson = new TextDecoder().decode(layoutEvent.data.buffer);
+
+    // 例: キーマップ要求
+    const getKeymapCmd = new Uint8Array([0x02]); // 仮
+    await device.sendReport(0, getKeymapCmd);
+    const keymapEvent = await device.receiveReport();
+    const keymapText = new TextDecoder().decode(keymapEvent.data.buffer);
+
+    // テキストエリアに反映
+    document.getElementById('json-text').value = layoutJson;
+    document.getElementById('keymap-text').value = keymapText;
+    updateLog("キーボードから取得完了。Update Layoutを押してください。");
+  } catch (e) {
+    updateLog("デバイス接続エラー: " + e.message);
+    console.error(e);
+  }
+};
+
 // キャンバスサイズをウインドウいっぱいに調整
 function resizeCanvas() {
   const canvasElem = document.getElementById('key-canvas');
