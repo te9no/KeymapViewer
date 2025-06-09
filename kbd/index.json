@@ -5,6 +5,12 @@
       "name": "Geacon Solstice",
       "author": "te9no",
       "description": "Split keyboard with 70 keys"
+    },
+    {
+      "id": "MKB",
+      "name": "MeKaBu",
+      "author": "te9no",
+      "description": "A distributed knowledge-type input device discovered in Realm of Split IV."
     }
   ]
 }
