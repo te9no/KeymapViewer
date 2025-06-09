@@ -174,11 +174,19 @@ document.getElementById('update-btn').onclick = function() {
   updateLog('Layout updated successfully');
 };
 
+// ユーティリティ関数
+function hexDump(data) {
+  if (!data) return 'null';
+  return Array.from(data)
+    .map(b => b.toString(16).padStart(2, '0'))
+    .join(' ');
+}
+
 // ZMK Studioプロトコル定義を修正
 const ZMK_PROTOCOL = {
-  REPORT_ID: 0x07,  // ZMK StudioのレポートID
-  USAGE_PAGE: 0xFF60,  // ZMK固有のusagePage
-  USAGE: 0x61,         // ZMK固有のusage
+  REPORT_ID: 0x01,  // デフォルトのレポートIDを1に変更
+  USAGE_PAGE: 0xFF60,
+  USAGE: 0x61,
   COMMANDS: {
     GET_PROTOCOL_VERSION: 0x01,
     GET_DEVICE_INFO: 0x02,
@@ -189,11 +197,37 @@ const ZMK_PROTOCOL = {
 
 // HIDコマンド送信関数
 async function sendZMKCommand(device, command, data = new Uint8Array(0)) {
-  const report = new Uint8Array(64);  // 64バイトレポート
+  console.log("Device info:", {
+    collections: device.collections,
+    opened: device.opened,
+    vendorId: device.vendorId,
+    productId: device.productId
+  });
+
+  // デバイスの情報を解析
+  const collection = device.collections?.[0];
+  const hasReportId = collection?.outputReports?.some(r => r.reportId !== 0);
+  const reportSize = collection?.outputReports?.[0]?.size || 64;
+  
+  // レポートを準備
+  const report = new Uint8Array(reportSize);
   report[0] = command;
   report.set(data, 1);
-  console.log(`Sending command 0x${command.toString(16)}:`, hexDump(report));
-  await device.sendReport(ZMK_PROTOCOL.REPORT_ID, report);
+  
+  console.log(`Sending HID report (size=${reportSize}, hasReportId=${hasReportId}):`, hexDump(report));
+  
+  try {
+    if (hasReportId) {
+      // レポートIDを使用
+      await device.sendReport(ZMK_PROTOCOL.REPORT_ID, report);
+    } else {
+      // レポートIDなし
+      await device.sendReport(0, report);
+    }
+  } catch (e) {
+    console.error("Failed to send report:", e);
+    throw new Error(`HID report send failed: ${e.message}`);
+  }
 }
 
 // HIDレスポンス待機関数
@@ -206,7 +240,10 @@ async function waitForZMKResponse(device) {
 
     const handler = event => {
       const data = new Uint8Array(event.data.buffer);
-      console.log("Received response:", hexDump(data));
+      console.log("Received HID report:", {
+        reportId: event.reportId,
+        data: hexDump(data)
+      });
       cleanup();
       resolve(data);
     };
@@ -214,7 +251,7 @@ async function waitForZMKResponse(device) {
     const timeoutId = setTimeout(() => {
       cleanup();
       reject(new Error('HID response timeout'));
-    }, 1000);  // タイムアウトを1秒に短縮
+    }, 1000);
 
     device.addEventListener('inputreport', handler);
   });
@@ -226,20 +263,25 @@ document.getElementById('zmk-connect-btn').onclick = async function() {
   try {
     const filters = [
       { 
-        vendorId: 0x1D50,
-        usagePage: ZMK_PROTOCOL.USAGE_PAGE,
-        usage: ZMK_PROTOCOL.USAGE
+        vendorId: 0x1D50
       },
       { 
         vendorId: 0x2FE9,
-        usagePage: ZMK_PROTOCOL.USAGE_PAGE,
-        usage: ZMK_PROTOCOL.USAGE
+        usagePage: 0xFF60  // ZMK固有のusagePage
       }
     ];
     
     // 既存のデバイスを確認
     const existingDevices = await navigator.hid.getDevices();
-    console.log("Existing HID devices:", existingDevices);
+    console.log("Existing HID devices:", existingDevices.map(d => ({
+      vendorId: d.vendorId,
+      productId: d.productId,
+      collections: d.collections?.map(c => ({
+        usage: c.usage,
+        usagePage: c.usagePage,
+        reports: c.outputReports
+      }))
+    })));
 
     const devices = await navigator.hid.requestDevice({ filters });
     if (!devices.length) {
