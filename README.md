@@ -1,5 +1,5 @@
 # KeymapViewer
-https://keymapviewer-test.streamlit.app/
+https://keymap-viewer-test.netlify.app/
 
 ## 概要
 キーボード入力に応じて視覚的に押されたキーをWebブラウザ上で表示するビューワーです。  
